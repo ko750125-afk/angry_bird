@@ -3,7 +3,10 @@
  * 앵그리버드 PWA 메인 물리 엔진(Matter.js) 및 Canvas 2D 렌더러
  */
 
-const { Engine, World, Bodies, Body, Events, Vector, Composite } = window.Matter;
+(function () {
+  'use strict';
+
+  const { Engine, World, Bodies, Body, Events, Vector, Composite } = window.Matter;
 
 const WORLD_W = 1280;
 const WORLD_H = 720;
@@ -1437,3 +1440,4 @@ class AngryBirdsGame {
 window.addEventListener('DOMContentLoaded', () => {
   window.game = new AngryBirdsGame();
 });
+})();

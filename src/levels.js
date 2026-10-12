@@ -4,7 +4,10 @@
  * 월드 기준 해상도: 1280 x 720 (지면 Y좌표: 580)
  */
 
-const GROUND_Y = 580;
+(function () {
+  'use strict';
+
+  const GROUND_Y = 580;
 
 /**
  * 바닥 기준 좌표(bottomY)로 블록 중심(x, y)을 정확히 계산하는 헬퍼
@@ -288,3 +291,4 @@ window.LEVELS = [
     ]
   }
 ];
+})();
