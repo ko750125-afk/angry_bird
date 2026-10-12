@@ -1120,7 +1120,7 @@ class AngryBirdsGame {
    * 매 프레임 물리 업데이트 및 턴 종료 판정
    */
   _update(dt) {
-    Engine.update(this.engine, Math.min(dt, 16.667));
+    Engine.update(this.engine, Math.min(Math.max(dt, 0), 16.666));
 
     // 구름 이동
     this.clouds.forEach((c) => {
@@ -2584,7 +2584,7 @@ class AngryBirdsGame {
     }
     const rawDt = now - this.lastFrameTime;
     this.lastFrameTime = now;
-    const dt = Math.min(Math.max(rawDt, 0), 16.667);
+    const dt = Math.min(Math.max(rawDt, 0), 16.666);
 
     this._update(dt);
     this._draw();
