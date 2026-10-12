@@ -115,6 +115,12 @@ class AngryBirdsGame {
     this.targetCameraX = 0;
     this.isOverviewMode = false;
 
+    // 모바일 무조건 세로 모드 및 정비율 가상 해상도 관리
+    this.isPortrait = false;
+    this.virtualW = WORLD_W;
+    this.virtualH = WORLD_H;
+    this.portraitOffsetY = 0;
+
     // 타이밍 관리
     this.levelStartTime = 0;
     this.launchTime = 0;
@@ -167,20 +173,53 @@ class AngryBirdsGame {
   }
 
   _initCanvasSize() {
-    this.canvas.width = WORLD_W;
-    this.canvas.height = WORLD_H;
+    this._handleResize();
+    window.addEventListener('resize', () => this._handleResize());
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this._handleResize(), 150);
+    });
   }
 
   /**
-   * 화면 클릭/터치 좌표를 1280x720 캔버스 내부 월드 좌표로 변환
+   * 화면 종횡비에 맞춘 정비율(1:1 정사각형 픽셀) 가상 캔버스 크기 및 지면 위치 보정
+   */
+  _handleResize() {
+    const rect = this.canvas.getBoundingClientRect();
+    const cssW = rect.width || window.innerWidth || 1280;
+    const cssH = rect.height || window.innerHeight || 720;
+    const aspect = cssH / (cssW || 1);
+
+    // 모바일이거나 세로 모드(aspect >= 1.05)인 경우
+    if (aspect >= 1.05 || window.innerWidth <= 900) {
+      this.isPortrait = true;
+      this.virtualW = WORLD_W; // 가로 폭 1280px 고정 기준
+      // 실제 화면 종횡비에 정확히 맞춘 세로 가상 해상도 (왜곡/찌그러짐 완전 방지)
+      this.virtualH = Math.max(WORLD_H, Math.round(WORLD_W * aspect));
+      // 슬링샷과 타겟 돼지들을 스마트폰 엄지손가락 조작이 가장 편한 화면 하단부로 정렬
+      this.portraitOffsetY = Math.max(0, this.virtualH - WORLD_H - 100);
+    } else {
+      this.isPortrait = false;
+      this.virtualW = WORLD_W;
+      this.virtualH = WORLD_H;
+      this.portraitOffsetY = 0;
+    }
+
+    if (this.canvas.width !== this.virtualW || this.canvas.height !== this.virtualH) {
+      this.canvas.width = this.virtualW;
+      this.canvas.height = this.virtualH;
+    }
+  }
+
+  /**
+   * 화면 클릭/터치 좌표를 캔버스 내부 월드 좌표로 변환 (세로 오프셋 및 1:1 보정)
    */
   _getCanvasCoords(clientX, clientY) {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = WORLD_W / rect.width;
-    const scaleY = WORLD_H / rect.height;
+    const scaleX = (this.virtualW || WORLD_W) / (rect.width || 1);
+    const scaleY = (this.virtualH || WORLD_H) / (rect.height || 1);
     return {
       x: (clientX - rect.left) * scaleX - this.cameraOffsetX,
-      y: (clientY - rect.top) * scaleY
+      y: (clientY - rect.top) * scaleY - (this.portraitOffsetY || 0)
     };
   }
 
@@ -198,7 +237,9 @@ class AngryBirdsGame {
 
       if (this.state === 'AIMING' && this.currentBird) {
         const dist = Math.hypot(pt.x - SLING_X, pt.y - SLING_Y);
-        if (dist <= 75) {
+        // 모바일/세로 화면에서는 터치 조작이 편리하도록 잡기 반경을 130px로 확대
+        const grabRadius = this.isPortrait ? 130 : 75;
+        if (dist <= grabRadius) {
           this.isOverviewMode = false;
           this.targetCameraX = 0;
           this.state = 'DRAGGING';
@@ -908,14 +949,16 @@ class AngryBirdsGame {
       if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
     }
 
-    // 날씨/환경 파티클 업데이트
+    // 날씨/환경 파티클 업데이트 (세로 모드 확장 하늘 고려)
+    const skyTopLimit = -(this.portraitOffsetY || 0) - 50;
+    const worldWidth = this.virtualW || WORLD_W;
     this.weatherParticles.forEach((wp) => {
       wp.x += wp.vx;
       wp.y += wp.vy;
-      if (wp.vy < 0 && wp.y < -30) wp.y = GROUND_Y + 10;
-      if (wp.vy > 0 && wp.y > GROUND_Y + 20) wp.y = -20;
-      if (wp.vx > 0 && wp.x > WORLD_W + 50) wp.x = -40;
-      if (wp.vx < 0 && wp.x < -50) wp.x = WORLD_W + 40;
+      if (wp.vy < 0 && wp.y < skyTopLimit) wp.y = GROUND_Y + 10;
+      if (wp.vy > 0 && wp.y > GROUND_Y + 20) wp.y = skyTopLimit;
+      if (wp.vx > 0 && wp.x > worldWidth + 50) wp.x = -40;
+      if (wp.vx < 0 && wp.x < -50) wp.x = worldWidth + 40;
       wp.phase = (wp.phase || 0) + 0.04;
     });
 
@@ -1074,7 +1117,7 @@ class AngryBirdsGame {
     // 1. 하늘 및 패럴랙스 배경 그리기 (6대 테마별 고유 환경)
     this._drawBackground(ctx, level);
 
-    ctx.translate(this.cameraOffsetX + shakeX, shakeY);
+    ctx.translate(this.cameraOffsetX + shakeX, (this.portraitOffsetY || 0) + shakeY);
 
     // 2. 지면 그리기 (6대 테마별 고유 바이옴)
     this._drawGround(ctx, level);
@@ -1133,7 +1176,12 @@ class AngryBirdsGame {
 
   _drawBackground(ctx, level) {
     const theme = (level && level.theme) || 'plains';
-    const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    const bgW = this.virtualW || WORLD_W;
+    const bgH = this.virtualH || WORLD_H;
+    const offsetY = this.portraitOffsetY || 0;
+
+    // 하늘 베이스 그라디언트 (0부터 지면 위치 GROUND_Y + offsetY까지)
+    const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y + offsetY);
 
     if (theme === 'desert') {
       // 1. 사막 협곡: 석양 레드오렌지 -> 황금 노랑
@@ -1141,9 +1189,46 @@ class AngryBirdsGame {
       grad.addColorStop(0.4, '#c2410c');
       grad.addColorStop(0.75, '#ea580c');
       grad.addColorStop(1, '#fde047');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+    } else if (theme === 'glacier') {
+      // 2. 극지방 빙하: 청록/보라 오로라 밤하늘
+      grad.addColorStop(0, '#042f2e');
+      grad.addColorStop(0.45, '#0f766e');
+      grad.addColorStop(0.8, '#0284c7');
+      grad.addColorStop(1, '#38bdf8');
+    } else if (theme === 'volcano') {
+      // 3. 마그마 화산: 핏빛 붉은 하늘과 화산재
+      grad.addColorStop(0, '#450a0a');
+      grad.addColorStop(0.4, '#7f1d1d');
+      grad.addColorStop(0.75, '#b91c1c');
+      grad.addColorStop(1, '#ea580c');
+    } else if (theme === 'royal') {
+      // 4. 달빛 왕궁: 딥 바이올렛 & 네이비 밤하늘
+      grad.addColorStop(0, '#09090b');
+      grad.addColorStop(0.45, '#1e1b4b');
+      grad.addColorStop(0.85, '#312e81');
+      grad.addColorStop(1, '#4338ca');
+    } else if (theme === 'space') {
+      // 5. 코스믹 우주: 딥 스페이스 & 성운 (Nebula)
+      grad.addColorStop(0, '#030712');
+      grad.addColorStop(0.45, '#111827');
+      grad.addColorStop(0.8, '#1e1b4b');
+      grad.addColorStop(1, '#3b0764');
+    } else {
+      // 6. 에메랄드 초원: 화창한 주간 푸른 하늘
+      grad.addColorStop(0, '#0284c7');
+      grad.addColorStop(0.65, '#38bdf8');
+      grad.addColorStop(1, '#bae6fd');
+    }
 
+    // 1. 전체 화면 하늘 채우기 (세로 확장 영역 전체 커버)
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, bgW, bgH);
+
+    // 2. 테마별 원경 실루엣 렌더링 (지면 오프셋에 맞춰 정렬)
+    ctx.save();
+    ctx.translate(0, offsetY);
+
+    if (theme === 'desert') {
       // 거대 석양 태양
       ctx.fillStyle = 'rgba(254, 240, 138, 0.6)';
       ctx.beginPath();
@@ -1179,14 +1264,6 @@ class AngryBirdsGame {
       });
 
     } else if (theme === 'glacier') {
-      // 2. 극지방 빙하: 청록/보라 오로라 밤하늘
-      grad.addColorStop(0, '#042f2e');
-      grad.addColorStop(0.45, '#0f766e');
-      grad.addColorStop(0.8, '#0284c7');
-      grad.addColorStop(1, '#38bdf8');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
       // 반짝이는 오로라 커튼 리본
       ctx.save();
       const auroraGrad = ctx.createLinearGradient(0, 40, WORLD_W, 280);
@@ -1219,20 +1296,12 @@ class AngryBirdsGame {
       ctx.fill();
 
     } else if (theme === 'volcano') {
-      // 3. 마그마 화산: 핏빛 붉은 하늘과 화산재
-      grad.addColorStop(0, '#450a0a');
-      grad.addColorStop(0.4, '#7f1d1d');
-      grad.addColorStop(0.75, '#b91c1c');
-      grad.addColorStop(1, '#ea580c');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
       // 화산 연기 구름 & 분화구
       ctx.fillStyle = '#1c1917';
       ctx.beginPath();
       ctx.moveTo(-100, GROUND_Y);
       ctx.lineTo(240, 240);
-      ctx.lineTo(320, 240); // 분화구 입구
+      ctx.lineTo(320, 240);
       ctx.lineTo(600, GROUND_Y);
       ctx.lineTo(820, 280);
       ctx.lineTo(900, 280);
@@ -1247,14 +1316,6 @@ class AngryBirdsGame {
       ctx.fill();
 
     } else if (theme === 'royal') {
-      // 4. 달빛 왕궁: 딥 바이올렛 & 네이비 밤하늘
-      grad.addColorStop(0, '#09090b');
-      grad.addColorStop(0.45, '#1e1b4b');
-      grad.addColorStop(0.85, '#312e81');
-      grad.addColorStop(1, '#4338ca');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
       // 거대한 보름달 (Full Moon)
       ctx.save();
       ctx.fillStyle = '#fef08a';
@@ -1270,13 +1331,13 @@ class AngryBirdsGame {
       ctx.beginPath();
       ctx.moveTo(-50, GROUND_Y);
       ctx.lineTo(120, 360);
-      ctx.lineTo(160, 320); // 첨탑 1
+      ctx.lineTo(160, 320);
       ctx.lineTo(200, 360);
       ctx.lineTo(440, 360);
-      ctx.lineTo(480, 280); // 첨탑 2
+      ctx.lineTo(480, 280);
       ctx.lineTo(520, 360);
       ctx.lineTo(760, 360);
-      ctx.lineTo(800, 310); // 첨탑 3
+      ctx.lineTo(800, 310);
       ctx.lineTo(840, 360);
       ctx.lineTo(1350, 360);
       ctx.lineTo(1350, GROUND_Y);
@@ -1284,14 +1345,6 @@ class AngryBirdsGame {
       ctx.fill();
 
     } else if (theme === 'space') {
-      // 5. 코스믹 우주: 딥 스페이스 & 성운 (Nebula)
-      grad.addColorStop(0, '#030712');
-      grad.addColorStop(0.45, '#111827');
-      grad.addColorStop(0.8, '#1e1b4b');
-      grad.addColorStop(1, '#3b0764');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
       // 성운 빛무리 (Cosmic Nebula)
       ctx.save();
       const nebGrad = ctx.createRadialGradient(420, 200, 30, 420, 200, 280);
@@ -1324,13 +1377,6 @@ class AngryBirdsGame {
       ctx.fill();
 
     } else {
-      // 6. 에메랄드 초원: 화창한 주간 푸른 하늘
-      grad.addColorStop(0, '#0284c7');
-      grad.addColorStop(0.65, '#38bdf8');
-      grad.addColorStop(1, '#bae6fd');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
       // 둥실둥실 구름
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
       this.clouds.forEach((c) => {
@@ -1360,33 +1406,37 @@ class AngryBirdsGame {
       ctx.arc(728, GROUND_Y - 40, 18, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    ctx.restore();
   }
 
   _drawGround(ctx, level) {
     const theme = (level && level.theme) || 'plains';
+    const groundDepth = Math.max(WORLD_H - GROUND_Y + 120, (this.virtualH || WORLD_H) - GROUND_Y + 1400);
+    const groundW = (this.virtualW || WORLD_W) + 1200;
 
     if (theme === 'desert') {
       // 사막: 붉은 황토 모래와 적갈색 암반
       ctx.fillStyle = '#9a3412';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#f97316';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 18);
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#ea580c';
-      ctx.fillRect(-300, GROUND_Y + 18, WORLD_W + 800, 6);
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else if (theme === 'glacier') {
       // 빙하: 투명한 청록색 빙판 지층 + 하얀 눈 층
       ctx.fillStyle = '#0891b2';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#f0fdfa';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 20);
+      ctx.fillRect(-400, GROUND_Y, groundW, 20);
       ctx.fillStyle = '#a5f3fc';
-      ctx.fillRect(-300, GROUND_Y + 20, WORLD_W + 800, 6);
+      ctx.fillRect(-400, GROUND_Y + 20, groundW, 6);
     } else if (theme === 'volcano') {
       // 화산: 검은 현무암 + 붉게 빛나는 용암 균열선
       ctx.fillStyle = '#1c1917';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#292524';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 18);
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
       // 용암 균열선 발광
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 3.5;
@@ -1400,27 +1450,27 @@ class AngryBirdsGame {
     } else if (theme === 'royal') {
       // 왕궁: 보랏빛 왕실 잔디 + 대리석 석조 타일
       ctx.fillStyle = '#1e1b4b';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#7c3aed';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 18);
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#6d28d9';
-      ctx.fillRect(-300, GROUND_Y + 18, WORLD_W + 800, 6);
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else if (theme === 'space') {
       // 우주: 달 표면 암석 + 크레이터
       ctx.fillStyle = '#0f172a';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#334155';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 18);
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#1e293b';
-      ctx.fillRect(-300, GROUND_Y + 18, WORLD_W + 800, 6);
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else {
       // 초원: 싱그러운 녹색 잔디 + 흙 지면 + 야생화 꽃밭
       ctx.fillStyle = '#78350f';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, WORLD_H - GROUND_Y);
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
       ctx.fillStyle = '#22c55e';
-      ctx.fillRect(-300, GROUND_Y, WORLD_W + 800, 18);
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#15803d';
-      ctx.fillRect(-300, GROUND_Y + 18, WORLD_W + 800, 6);
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
 
       // 잔디 위 점점이 핀 들꽃
       ctx.fillStyle = '#fef08a';
