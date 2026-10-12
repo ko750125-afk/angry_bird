@@ -1,9 +1,13 @@
-const CACHE_NAME = 'angry-birds-pwa-v7';
+const CACHE_NAME = 'angry-birds-pwa-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './public/icons/icon.svg',
+  './public/icons/icon-192.png',
+  './public/icons/icon-512.png',
+  './public/icons/icon.png',
+  './public/icons/apple-touch-icon.png',
   './public/vendor/matter.min.js',
   './src/style.css',
   './src/sound.js',
