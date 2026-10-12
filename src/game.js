@@ -1089,21 +1089,30 @@ class AngryBirdsGame {
 
   _updateHud() {
     const level = window.LEVELS[this.currentLevelIdx];
-    document.getElementById('hudStageTitle').textContent = level.title;
-    document.getElementById('hudSubtitle').textContent = level.subtitle;
-    document.getElementById('hudScore').textContent = this.score.toLocaleString();
-    document.getElementById('hudPigsLeft').textContent = `${this.pigs.length}마리`;
+    const stageTitleEl = document.getElementById('hudStageTitle');
+    if (stageTitleEl) stageTitleEl.textContent = level.title;
+
+    const subtitleEl = document.getElementById('hudSubtitle');
+    if (subtitleEl) subtitleEl.textContent = level.subtitle;
+
+    const scoreEl = document.getElementById('hudScore');
+    if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
+
+    const pigsLeftEl = document.getElementById('hudPigsLeft');
+    if (pigsLeftEl) pigsLeftEl.textContent = `${this.pigs.length}마리`;
 
     // 현재 버드 스킬 힌트 표시
     const skillBanner = document.getElementById('hudSkillHint');
-    const activeType =
-      this.currentBird?.type ||
-      (this.activeBirds[0] && this.activeBirds[0].gameData?.birdType);
-    if (activeType && window.BIRD_INFO[activeType]) {
-      const info = window.BIRD_INFO[activeType];
-      skillBanner.textContent = `🐦 ${info.name} — ${info.skillDesc}`;
-    } else {
-      skillBanner.textContent = '🎯 새총을 뒤로 당겨 조준하고 발사하세요!';
+    if (skillBanner) {
+      const activeType =
+        this.currentBird?.type ||
+        (this.activeBirds[0] && this.activeBirds[0].gameData?.birdType);
+      if (activeType && window.BIRD_INFO[activeType]) {
+        const info = window.BIRD_INFO[activeType];
+        skillBanner.textContent = `🐦 ${info.name} — ${info.skillDesc}`;
+      } else {
+        skillBanner.textContent = '🎯 새총을 뒤로 당겨 조준하고 발사하세요!';
+      }
     }
   }
 
