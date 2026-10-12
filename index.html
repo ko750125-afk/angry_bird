@@ -18,11 +18,10 @@
 </head>
 <body>
   <div class="app-wrapper">
-    <!-- 상단 HUD -->
+    <!-- 상단 미니멀 HUD (화면 시야 극대화) -->
     <header class="hud-top">
       <div class="hud-brand">
         <div id="hudStageTitle" class="hud-stage-title">STAGE 1 : 초원 훈련장</div>
-        <div id="hudSubtitle" class="hud-subtitle">새총을 당겨 나무 오두막 안의 초록 돼지들을 물리치세요!</div>
       </div>
 
       <div class="hud-stats">
@@ -31,27 +30,44 @@
           <span id="hudScore" class="stat-value score">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">남은 돼지</span>
-          <span id="hudPigsLeft" class="stat-value pigs">3마리</span>
+          <span class="stat-label">돼지</span>
+          <span id="hudPigsLeft" class="stat-value pigs">3</span>
         </div>
       </div>
 
       <div class="hud-controls">
-        <button id="btnStages" class="hud-btn" type="button">🗺️ 스테이지</button>
-        <button id="btnOverview" class="hud-btn" type="button">🔭 전장 보기</button>
-        <button id="btnRestart" class="hud-btn" type="button">🔄 재시작(R)</button>
-        <button id="btnSfx" class="hud-btn" type="button">🔊 효과음 ON</button>
-        <button id="btnBgm" class="hud-btn" type="button">🎵 BGM ON</button>
-        <button id="btnInstallPwa" class="hud-btn install-btn" type="button" style="display: none;">📲 앱 설치</button>
+        <button id="btnRestart" class="hud-icon-btn" type="button" title="재시작 (R)">🔄</button>
+        <button id="btnSettings" class="hud-icon-btn" type="button" title="설정 & 메뉴">⚙️</button>
       </div>
     </header>
 
     <!-- 메인 물리 캔버스 -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- 하단 스킬 힌트 배너 -->
+    <!-- 하단 스킬 힌트 미니 플로팅 배너 -->
     <div id="hudSkillHint" class="hud-bottom">
-      🐦 레드 (Red) — 공중 클릭/터치: 주변을 밀어내는 충격파(Shockwave) 발산!
+      🐦 레드 — 공중 터치: 충격파 발산!
+    </div>
+
+    <!-- 설정 & 메뉴 모달 (각종 기능버튼 통합) -->
+    <div id="settingsModal" class="modal-backdrop hidden">
+      <div class="modal-box settings-modal-box">
+        <h2 class="modal-title">⚙️ 게임 설정 & 메뉴</h2>
+        <p class="modal-subtitle">사운드, 스테이지 선택, 전장 시야를 조작할 수 있습니다.</p>
+        <div class="settings-list">
+          <button id="btnSettingsStages" class="settings-action-btn" type="button">🗺️ 스테이지 선택</button>
+          <button id="btnSettingsOverview" class="settings-action-btn" type="button">🔭 전장 전체 둘러보기 (ON/OFF)</button>
+          <button id="btnSettingsRestart" class="settings-action-btn" type="button">🔄 현재 스테이지 재시작</button>
+          <div class="settings-toggle-row">
+            <button id="btnSettingsSfx" class="settings-toggle-btn" type="button">🔊 효과음 (SFX) ON</button>
+            <button id="btnSettingsBgm" class="settings-toggle-btn" type="button">🎵 BGM ON</button>
+          </div>
+          <button id="btnSettingsInstall" class="settings-action-btn install" type="button" style="display: none;">📲 홈 화면에 앱 추가(PWA)</button>
+        </div>
+        <div class="modal-actions" style="margin-top: 18px;">
+          <button id="btnCloseSettingsModal" class="action-btn next" type="button">확인</button>
+        </div>
+      </div>
     </div>
 
     <!-- 스테이지 클리어 / 실패 결과 모달 -->
@@ -97,21 +113,23 @@
     }
 
     let deferredPrompt = null;
-    const installBtn = document.getElementById('btnInstallPwa');
+    const installBtn = document.getElementById('btnSettingsInstall');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'inline-flex';
+      if (installBtn) installBtn.style.display = 'block';
     });
 
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    });
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+    }
   </script>
 </body>
 </html>

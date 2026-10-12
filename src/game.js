@@ -255,30 +255,51 @@ class AngryBirdsGame {
   }
 
   /**
-   * 가로 모드(Landscape) 표준 16:9 와이드 해상도(1280x720) 정비율 유지
+   * 모바일/데스크톱 화면 전체를 100% 끝까지 활용하는 동적 뷰포트(Dynamic Viewport) 리사이즈
    */
   _handleResize() {
-    this.isPortrait = false;
-    this.virtualW = WORLD_W;
-    this.virtualH = WORLD_H;
-    this.portraitOffsetY = 0;
+    const isMobile = window.innerWidth <= 950 || window.innerHeight <= 600;
+    const aspect = (window.innerWidth || 1280) / (window.innerHeight || 720);
 
-    if (this.canvas.width !== WORLD_W || this.canvas.height !== WORLD_H) {
-      this.canvas.width = WORLD_W;
-      this.canvas.height = WORLD_H;
+    if (isMobile) {
+      if (aspect >= 1.0) {
+        // 모바일 가로 모드: 720 높이 기준으로 가로를 뷰포트 끝까지 확장 (19.5:9 등 화면 전체 활용)
+        this.virtualH = WORLD_H;
+        this.virtualW = Math.max(WORLD_W, Math.round(WORLD_H * aspect));
+        this.portraitOffsetY = 0;
+        this.isPortrait = false;
+      } else {
+        // 모바일 세로 모드: 1280 폭 기준으로 세로를 뷰포트 끝까지 확장 (상하 여백 0% 풀스크린)
+        this.virtualW = WORLD_W;
+        this.virtualH = Math.max(WORLD_H, Math.round(WORLD_W / aspect));
+        // 슬링샷과 돼지가 시야에 안정적으로 잡히도록 Y 오프셋 계산
+        this.portraitOffsetY = Math.max(0, Math.round((this.virtualH - WORLD_H) * 0.45));
+        this.isPortrait = true;
+      }
+    } else {
+      // 데스크톱 / PC: 표준 1280 x 720 아케이드 뷰포트
+      this.virtualW = WORLD_W;
+      this.virtualH = WORLD_H;
+      this.portraitOffsetY = 0;
+      this.isPortrait = false;
+    }
+
+    if (this.canvas.width !== this.virtualW || this.canvas.height !== this.virtualH) {
+      this.canvas.width = this.virtualW;
+      this.canvas.height = this.virtualH;
     }
   }
 
   /**
-   * 화면 클릭/터치 좌표를 캔버스 내부 월드 좌표(1280x720)로 정밀 변환
+   * 화면 클릭/터치 좌표를 캔버스 내부 월드 좌표로 정밀 변환
    */
   _getCanvasCoords(clientX, clientY) {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = WORLD_W / (rect.width || 1);
-    const scaleY = WORLD_H / (rect.height || 1);
+    const scaleX = (this.virtualW || WORLD_W) / (rect.width || 1);
+    const scaleY = (this.virtualH || WORLD_H) / (rect.height || 1);
     return {
       x: (clientX - rect.left) * scaleX - this.cameraOffsetX,
-      y: (clientY - rect.top) * scaleY
+      y: (clientY - rect.top) * scaleY - (this.portraitOffsetY || 0)
     };
   }
 
@@ -296,7 +317,7 @@ class AngryBirdsGame {
 
       if (this.state === 'AIMING' && this.currentBird) {
         const dist = Math.hypot(pt.x - SLING_X, pt.y - SLING_Y);
-        // 모바일 가로 모드에서도 엄지손가락 터치가 쾌적하도록 반경 85px 제공
+        // 모바일에서도 엄지손가락 터치가 쾌적하도록 반경 85px 제공
         if (dist <= 85) {
           this.isOverviewMode = false;
           this.targetCameraX = 0;
@@ -358,41 +379,67 @@ class AngryBirdsGame {
       }
     });
 
-    // 상단 UI 버튼 바인딩
+    // 1. 상단 퀵 버튼
     document.getElementById('btnRestart').addEventListener('click', () => {
       window.soundEngine.playUiClick();
       this.loadLevel(this.currentLevelIdx);
     });
 
-    document.getElementById('btnStages').addEventListener('click', () => {
+    const settingsModal = document.getElementById('settingsModal');
+    const stageModal = document.getElementById('stageModal');
+
+    document.getElementById('btnSettings').addEventListener('click', () => {
       window.soundEngine.playUiClick();
+      settingsModal.classList.remove('hidden');
+    });
+
+    document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
+      window.soundEngine.playUiClick();
+      settingsModal.classList.add('hidden');
+    });
+
+    // 2. 설정 메뉴 내부 액션 버튼들
+    document.getElementById('btnSettingsStages').addEventListener('click', () => {
+      window.soundEngine.playUiClick();
+      settingsModal.classList.add('hidden');
       this._renderStageSelectModal();
-      document.getElementById('stageModal').classList.remove('hidden');
+      stageModal.classList.remove('hidden');
     });
 
     document.getElementById('btnCloseStageModal').addEventListener('click', () => {
       window.soundEngine.playUiClick();
-      document.getElementById('stageModal').classList.add('hidden');
+      stageModal.classList.add('hidden');
     });
 
-    document.getElementById('btnOverview').addEventListener('click', () => {
+    const overviewBtn = document.getElementById('btnSettingsOverview');
+    overviewBtn.addEventListener('click', () => {
       window.soundEngine.playUiClick();
       this.isOverviewMode = !this.isOverviewMode;
-      this.targetCameraX = this.isOverviewMode ? -140 : 0;
+      this.targetCameraX = this.isOverviewMode ? -160 : 0;
+      overviewBtn.textContent = this.isOverviewMode ? '🔭 전장 둘러보기: ON (와이드 뷰)' : '🔭 전장 둘러보기: OFF (기본 뷰)';
     });
 
-    document.getElementById('btnSfx').addEventListener('click', (e) => {
+    document.getElementById('btnSettingsRestart').addEventListener('click', () => {
+      window.soundEngine.playUiClick();
+      settingsModal.classList.add('hidden');
+      this.loadLevel(this.currentLevelIdx);
+    });
+
+    const sfxBtn = document.getElementById('btnSettingsSfx');
+    sfxBtn.addEventListener('click', () => {
       const enabled = window.soundEngine.toggleSfx();
-      e.currentTarget.textContent = enabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
-      e.currentTarget.classList.toggle('muted', !enabled);
+      sfxBtn.textContent = enabled ? '🔊 효과음 (SFX) ON' : '🔇 효과음 (SFX) OFF';
+      sfxBtn.classList.toggle('muted', !enabled);
     });
 
-    document.getElementById('btnBgm').addEventListener('click', (e) => {
+    const bgmBtn = document.getElementById('btnSettingsBgm');
+    bgmBtn.addEventListener('click', () => {
       const enabled = window.soundEngine.toggleBgm();
-      e.currentTarget.textContent = enabled ? '🎵 BGM ON' : '🔇 BGM OFF';
-      e.currentTarget.classList.toggle('muted', !enabled);
+      bgmBtn.textContent = enabled ? '🎵 BGM ON' : '🔇 BGM OFF';
+      bgmBtn.classList.toggle('muted', !enabled);
     });
 
+    // 3. 결과 모달 액션
     document.getElementById('btnModalRetry').addEventListener('click', () => {
       window.soundEngine.playUiClick();
       document.getElementById('resultModal').classList.add('hidden');
