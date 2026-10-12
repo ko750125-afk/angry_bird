@@ -505,6 +505,139 @@ class SoundEngine {
   }
 
   /**
+   * 스프링 점프대 띠요오옹~(Boing!) 탄성 반발음
+   */
+  playSpringBounce() {
+    if (!this.sfxEnabled) return;
+    this.unlock();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(740, now + 0.16);
+    osc.frequency.exponentialRampToValueAtTime(320, now + 0.32);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.36);
+  }
+
+  /**
+   * 크리스탈/보석 쨍그랑 산산조각 사운드
+   */
+  playGlassShatter() {
+    if (!this.sfxEnabled) return;
+    this.unlock();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [1850, 2400, 3200, 4100].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq + (Math.random() - 0.5) * 200, now + idx * 0.02);
+      osc.frequency.exponentialRampToValueAtTime(600, now + idx * 0.02 + 0.18);
+
+      gain.gain.setValueAtTime(0.2, now + idx * 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.02 + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.02);
+      osc.stop(now + idx * 0.02 + 0.23);
+    });
+  }
+
+  /**
+   * 포털 순간이동(Warp Whoosh) 신비로운 공명음
+   */
+  playPortalWarp() {
+    if (!this.sfxEnabled) return;
+    this.unlock();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(220, now + 0.28);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1200, now);
+    filter.Q.setValueAtTime(8, now);
+
+    gain.gain.setValueAtTime(0.28, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.3);
+  }
+
+  /**
+   * 풍선 펑!(Balloon Pop) 사운드
+   */
+  playBalloonPop() {
+    if (!this.sfxEnabled) return;
+    this.unlock();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+
+    gain.gain.setValueAtTime(0.38, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  }
+
+  /**
+   * 황금알(Golden Egg) 보너스 팡파르 사운드
+   */
+  playGoldenEgg() {
+    if (!this.sfxEnabled) return;
+    this.unlock();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, now + i * 0.06);
+
+      gain.gain.setValueAtTime(0.25, now + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.06);
+      osc.stop(now + i * 0.06 + 0.36);
+    });
+  }
+
+  /**
    * 스테이지 클리어 팡파르
    */
   playVictory() {

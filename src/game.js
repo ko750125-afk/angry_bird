@@ -66,13 +66,87 @@ const MATERIAL_PROPS = {
     fill: '#475569',
     stroke: '#1e293b',
     crackColor: '#0f172a'
+  },
+  spring: {
+    hp: 99999,
+    density: 0.015,
+    friction: 0.05,
+    restitution: 1.95,
+    score: 0,
+    fill: '#ef4444',
+    stroke: '#991b1b',
+    crackColor: '#fca5a5'
+  },
+  crystal: {
+    hp: 32,
+    density: 0.0018,
+    friction: 0.18,
+    restitution: 0.25,
+    score: 1500,
+    fill: 'rgba(217, 70, 239, 0.88)',
+    stroke: '#a21caf',
+    crackColor: '#fdf4ff'
+  },
+  steel: {
+    hp: 190,
+    density: 0.0072,
+    friction: 0.75,
+    restitution: 0.04,
+    score: 1200,
+    fill: '#334155',
+    stroke: '#0f172a',
+    crackColor: '#94a3b8'
+  },
+  balloon: {
+    hp: 8,
+    density: 0.0001,
+    friction: 0.1,
+    restitution: 0.45,
+    score: 800,
+    fill: '#f43f5e',
+    stroke: '#be123c',
+    crackColor: '#fecdd3'
+  },
+  golden_egg: {
+    hp: 14,
+    density: 0.0022,
+    friction: 0.35,
+    restitution: 0.4,
+    score: 10000,
+    fill: '#fbbf24',
+    stroke: '#d97706',
+    crackColor: '#fef08a'
+  },
+  portal_in: {
+    hp: 99999,
+    density: 0.01,
+    friction: 0.0,
+    restitution: 0.0,
+    score: 0,
+    fill: '#38bdf8',
+    stroke: '#0284c7',
+    crackColor: '#bae6fd'
+  },
+  portal_out: {
+    hp: 99999,
+    density: 0.01,
+    friction: 0.0,
+    restitution: 0.0,
+    score: 0,
+    fill: '#f97316',
+    stroke: '#c2410c',
+    crackColor: '#ffedd5'
   }
 };
 
 const PIG_PROPS = {
   normal: { hp: 22, score: 5000, density: 0.002 },
   helmet: { hp: 48, score: 7500, density: 0.0028 },
-  king: { hp: 85, score: 15000, density: 0.0035 }
+  king: { hp: 85, score: 15000, density: 0.0035 },
+  balloon_pig: { hp: 22, score: 6500, density: 0.0004 },
+  golem: { hp: 150, score: 25000, density: 0.006 },
+  wizard: { hp: 65, score: 14000, density: 0.0026 },
+  astronaut: { hp: 45, score: 9000, density: 0.0018 }
 };
 
 class AngryBirdsGame {
@@ -424,8 +498,10 @@ class AngryBirdsGame {
     level.blocks.forEach((b) => {
       const mat = MATERIAL_PROPS[b.material] || MATERIAL_PROPS.wood;
       let body;
-      if (b.shape === 'circle' || b.material === 'boulder') {
-        body = Bodies.circle(b.x, b.y, b.radius, {
+      const isPortal = b.material === 'portal_in' || b.material === 'portal_out';
+
+      if (b.shape === 'circle' || b.material === 'boulder' || b.material === 'golden_egg' || b.material === 'balloon') {
+        body = Bodies.circle(b.x, b.y, b.radius || 24, {
           density: mat.density,
           friction: mat.friction,
           restitution: mat.restitution,
@@ -436,7 +512,7 @@ class AngryBirdsGame {
           kind: 'block',
           shape: 'circle',
           material: b.material,
-          radius: b.radius,
+          radius: b.radius || 24,
           hp: mat.hp,
           maxHp: mat.hp,
           score: mat.score
@@ -447,7 +523,8 @@ class AngryBirdsGame {
           friction: mat.friction,
           frictionStatic: 1.0,
           restitution: mat.restitution,
-          isStatic: b.isStatic || false,
+          isStatic: isPortal ? true : (b.isStatic || false),
+          isSensor: isPortal, // 포털은 통과 가능한 센서 바디로 설정
           label: 'block'
         });
         body.gameData = {
@@ -458,7 +535,10 @@ class AngryBirdsGame {
           h: b.h,
           hp: mat.hp,
           maxHp: mat.hp,
-          score: mat.score
+          score: mat.score,
+          targetPortalId: b.targetPortalId || null,
+          spin: 0,
+          compressTimer: 0
         };
       }
       this.blocks.push(body);
@@ -468,11 +548,13 @@ class AngryBirdsGame {
     // 돼지 생성
     level.pigs.forEach((p) => {
       const prop = PIG_PROPS[p.role] || PIG_PROPS.normal;
+      const isBalloonPig = p.role === 'balloon_pig';
       const body = Bodies.circle(p.x, p.y, p.radius, {
         density: prop.density,
         friction: 0.75,
         frictionStatic: 0.9,
         restitution: 0.25,
+        isStatic: isBalloonPig, // 풍선 돼지는 격추되기 전까지 공중 부유 고정
         label: 'pig'
       });
       body.gameData = {
@@ -482,6 +564,8 @@ class AngryBirdsGame {
         hp: prop.hp,
         maxHp: prop.hp,
         score: prop.score,
+        isFloating: isBalloonPig,
+        originY: p.y,
         blinkTimer: Math.random() * 200
       };
       this.pigs.push(body);
@@ -753,20 +837,95 @@ class AngryBirdsGame {
       return;
     }
 
+    // 🌟 스프링 점프대 기믹: 접촉한 오브젝트를 상공으로 강력하게 튕겨냄!
+    if (target.gameData.material === 'spring') {
+      target.gameData.compressTimer = 1.0;
+      const currentVx = other.velocity.x;
+      const bounceVx = Math.abs(currentVx) > 2 ? currentVx * 1.35 : (other.position.x < target.position.x ? 7 : -7);
+      const bounceVy = -Math.max(18.5, Math.abs(other.velocity.y) * 1.6);
+      Body.setVelocity(other, { x: bounceVx, y: bounceVy });
+      window.soundEngine.playSpringBounce();
+      this.shockwaves.push({
+        x: target.position.x,
+        y: target.position.y - 10,
+        radius: 12,
+        maxRadius: 75,
+        alpha: 1.0,
+        color: '#ef4444'
+      });
+      this._spawnParticles(target.position.x, target.position.y - 10, '#ef4444', 12, 6);
+      this._addFloatingText(target.position.x, target.position.y - 30, 'BOING! 🚀', '#f87171');
+      return;
+    }
+
+    // 🌟 시공간 워프 포털(Portal): 입구 통과 시 출구 포털로 순간이동!
+    if (target.gameData.material === 'portal_in') {
+      const now = performance.now();
+      if (!other.lastWarpTime || now - other.lastWarpTime > 800) {
+        other.lastWarpTime = now;
+        const outPortal = this.blocks.find((b) => b.gameData && b.gameData.material === 'portal_out');
+        if (outPortal) {
+          Body.setPosition(other, {
+            x: outPortal.position.x + 36,
+            y: outPortal.position.y
+          });
+          const curSpeed = Vector.magnitude(other.velocity);
+          const launchSpd = Math.max(14, curSpeed * 1.15);
+          Body.setVelocity(other, {
+            x: launchSpd,
+            y: other.velocity.y * 0.7
+          });
+          window.soundEngine.playPortalWarp();
+          this.shockwaves.push({
+            x: target.position.x,
+            y: target.position.y,
+            radius: 14,
+            maxRadius: 85,
+            alpha: 1.0,
+            color: '#38bdf8'
+          });
+          this.shockwaves.push({
+            x: outPortal.position.x,
+            y: outPortal.position.y,
+            radius: 14,
+            maxRadius: 85,
+            alpha: 1.0,
+            color: '#f97316'
+          });
+          this._spawnParticles(target.position.x, target.position.y, '#38bdf8', 16, 6);
+          this._spawnParticles(outPortal.position.x, outPortal.position.y, '#f97316', 16, 6);
+          this._addFloatingText(outPortal.position.x, outPortal.position.y - 35, 'WARP! 🌀', '#38bdf8');
+        }
+      }
+      return;
+    }
+    if (target.gameData.material === 'portal_out') return;
+
+    // 🌟 풍선 비행 돼지: 충격을 받으면 풍선이 펑 터지며 아래로 추락!
+    if (target.gameData.kind === 'pig' && target.gameData.role === 'balloon_pig') {
+      if (target.gameData.isFloating) {
+        target.gameData.isFloating = false;
+        Body.setStatic(target, false);
+        window.soundEngine.playBalloonPop();
+        this._spawnParticles(target.position.x, target.position.y - 35, '#f43f5e', 18, 6);
+        this._addFloatingText(target.position.x, target.position.y - 45, '🎈 풍선 펑!', '#f43f5e');
+      }
+    }
+
     let multiplier = 3.2;
     if (other.gameData && other.gameData.kind === 'bird') {
       const bType = other.gameData.birdType;
       multiplier = 4.5;
       if (bType === 'big') {
-        multiplier = 16.0; // 테렌스의 압도적인 파쇄력
+        multiplier = 18.0; // 테렌스의 압도적인 파쇄력
       } else if (target.gameData.kind === 'block') {
         const mat = target.gameData.material;
         if (bType === 'yellow' && mat === 'wood') {
-          multiplier = other.gameData.boosted ? 12.0 : 8.0;
-        } else if (bType === 'blue' && mat === 'ice') {
-          multiplier = 9.5;
-        } else if (bType === 'black' && mat === 'stone') {
-          multiplier = 8.5;
+          multiplier = other.gameData.boosted ? 13.0 : 8.5;
+        } else if (bType === 'blue' && (mat === 'ice' || mat === 'crystal')) {
+          multiplier = 12.0; // 블루는 얼음과 크리스탈에 초특화!
+        } else if (bType === 'black' && (mat === 'stone' || mat === 'steel')) {
+          multiplier = 10.5; // 폭탄새는 돌과 강철에 초특화!
         }
       } else if (target.gameData.kind === 'pig') {
         multiplier = 7.5;
@@ -775,7 +934,7 @@ class AngryBirdsGame {
       if (other.gameData.material === 'boulder') {
         multiplier = 14.0; // 굴러가는 바위 궤멸 충돌
       } else {
-        multiplier = other.gameData.material === 'stone' ? 4.2 : 2.8;
+        multiplier = other.gameData.material === 'stone' || other.gameData.material === 'steel' ? 4.5 : 2.8;
       }
     }
 
@@ -796,10 +955,27 @@ class AngryBirdsGame {
       const matProp = MATERIAL_PROPS[data.material] || MATERIAL_PROPS.wood;
       if (data.hp <= 0) {
         data.destroyed = true;
-        window.soundEngine.playImpact(data.material, 1.0, true);
-        this._spawnParticles(pos.x, pos.y, matProp.fill, 14, 6);
-        this._addScore(data.score, pos.x, pos.y, '#fef08a');
+        
+        // 머티리얼별 특수 사운드 및 효과
+        if (data.material === 'crystal') {
+          window.soundEngine.playGlassShatter();
+          this._spawnParticles(pos.x, pos.y, '#f0abfc', 18, 7);
+          this._spawnParticles(pos.x, pos.y, '#c084fc', 14, 5);
+          this._addFloatingText(pos.x, pos.y - 25, '💎 크리스탈 산산조각!', '#f0abfc');
+        } else if (data.material === 'golden_egg') {
+          window.soundEngine.playGoldenEgg();
+          this._spawnParticles(pos.x, pos.y, '#fde047', 30, 9);
+          this._spawnParticles(pos.x, pos.y, '#f59e0b', 20, 6);
+          this._addFloatingText(pos.x, pos.y - 30, '🌟 황금알 보너스 +10,000!', '#fde047');
+        } else if (data.material === 'balloon') {
+          window.soundEngine.playBalloonPop();
+          this._spawnParticles(pos.x, pos.y, '#f43f5e', 14, 6);
+        } else {
+          window.soundEngine.playImpact(data.material, 1.0, true);
+          this._spawnParticles(pos.x, pos.y, matProp.fill, 14, 6);
+        }
 
+        this._addScore(data.score, pos.x, pos.y, '#fef08a');
         World.remove(this.world, body);
         this.blocks = this.blocks.filter((b) => b !== body);
 
@@ -815,10 +991,29 @@ class AngryBirdsGame {
       if (data.hp <= 0) {
         data.destroyed = true;
         window.soundEngine.playPigDestroy();
-        this._spawnParticles(pos.x, pos.y, '#4ade80', 22, 7);
-        this._spawnParticles(pos.x, pos.y, '#ffffff', 12, 5);
-        this._addScore(data.score, pos.x, pos.y - 10, '#4ade80');
 
+        if (data.role === 'golem') {
+          this._spawnParticles(pos.x, pos.y, '#64748b', 25, 8);
+          this._spawnParticles(pos.x, pos.y, '#4ade80', 20, 7);
+          this._addFloatingText(pos.x, pos.y - 30, '🗿 골렘 돼지 격파! +25,000', '#94a3b8');
+        } else if (data.role === 'wizard') {
+          this._spawnParticles(pos.x, pos.y, '#c084fc', 25, 8);
+          this._spawnParticles(pos.x, pos.y, '#4ade80', 20, 7);
+          this._addFloatingText(pos.x, pos.y - 30, '🔮 마법사 돼지 소탕! +14,000', '#c084fc');
+        } else if (data.role === 'astronaut') {
+          this._spawnParticles(pos.x, pos.y, '#38bdf8', 25, 7);
+          this._spawnParticles(pos.x, pos.y, '#4ade80', 20, 7);
+          this._addFloatingText(pos.x, pos.y - 30, '👨‍🚀 우주비행사 돼지 격퇴!', '#38bdf8');
+        } else if (data.role === 'balloon_pig') {
+          this._spawnParticles(pos.x, pos.y, '#f43f5e', 18, 6);
+          this._spawnParticles(pos.x, pos.y, '#4ade80', 20, 7);
+          this._addFloatingText(pos.x, pos.y - 30, '🎈 풍선 돼지 격추!', '#4ade80');
+        } else {
+          this._spawnParticles(pos.x, pos.y, '#4ade80', 22, 7);
+          this._spawnParticles(pos.x, pos.y, '#ffffff', 12, 5);
+        }
+
+        this._addScore(data.score, pos.x, pos.y - 10, '#4ade80');
         World.remove(this.world, body);
         this.pigs = this.pigs.filter((p) => p !== body);
         this._updateHud();
@@ -901,6 +1096,27 @@ class AngryBirdsGame {
 
     // 카메라 부드러운 보간
     this.cameraOffsetX += (this.targetCameraX - this.cameraOffsetX) * 0.08;
+
+    // 풍선 돼지 공중 부유 흔들림 (격추 전까지)
+    const animNow = performance.now();
+    this.pigs.forEach((pigBody) => {
+      const pData = pigBody.gameData;
+      if (pData && pData.isFloating && pData.originY !== undefined) {
+        const floatY = pData.originY + Math.sin(animNow * 0.003 + pigBody.id) * 7.5;
+        Body.setPosition(pigBody, { x: pigBody.position.x, y: floatY });
+      }
+    });
+
+    // 스프링 압축 복원 및 포털 에너지 소용돌이 회전
+    this.blocks.forEach((b) => {
+      const bData = b.gameData;
+      if (!bData) return;
+      if (bData.material === 'spring' && bData.compressTimer > 0) {
+        bData.compressTimer = Math.max(0, bData.compressTimer - dt * 0.006);
+      } else if (bData.material === 'portal_in' || bData.material === 'portal_out') {
+        bData.spin = (bData.spin || 0) + 0.045;
+      }
+    });
 
     // 화면 밖으로 떨어진 돼지/블록 처리
     [...this.pigs].forEach((pigBody) => {
@@ -1737,34 +1953,93 @@ class AngryBirdsGame {
     ctx.translate(body.position.x, body.position.y);
     ctx.rotate(body.angle);
 
-    if (data.shape === 'circle' || data.material === 'boulder') {
-      const r = data.radius || 28;
-      // 둥근 롤링 바위 렌더링
-      const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
-      grad.addColorStop(0, '#64748b');
-      grad.addColorStop(0.65, '#334155');
-      grad.addColorStop(1, '#0f172a');
-      ctx.fillStyle = grad;
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+    // 1. 원형 오브젝트 (롤링 바위, 황금알, 풍선)
+    if (data.shape === 'circle' || data.material === 'boulder' || data.material === 'golden_egg' || data.material === 'balloon') {
+      const r = data.radius || 24;
 
-      // 회전하는 암석 크레이터 및 표면 질감
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
-      ctx.beginPath();
-      ctx.arc(-r * 0.3, r * 0.22, r * 0.24, 0, Math.PI * 2);
-      ctx.arc(r * 0.28, -r * 0.25, r * 0.2, 0, Math.PI * 2);
-      ctx.arc(r * 0.12, r * 0.36, r * 0.18, 0, Math.PI * 2);
-      ctx.fill();
+      if (data.material === 'golden_egg') {
+        // 🌟 전설의 황금알 (Golden Egg)
+        const eggGrad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+        eggGrad.addColorStop(0, '#fef08a');
+        eggGrad.addColorStop(0.5, '#fbbf24');
+        eggGrad.addColorStop(1, '#d97706');
+        ctx.fillStyle = eggGrad;
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 0.9, r * 1.15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-      // 바위 하이라이트
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
-      ctx.beginPath();
-      ctx.arc(-r * 0.35, -r * 0.35, r * 0.28, 0, Math.PI * 2);
-      ctx.fill();
+        // 황금 반짝이 십자 별빛
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-r * 0.3, -r * 0.4, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.3 - 7, -r * 0.4);
+        ctx.lineTo(-r * 0.3 + 7, -r * 0.4);
+        ctx.moveTo(-r * 0.3, -r * 0.4 - 7);
+        ctx.lineTo(-r * 0.3, -r * 0.4 + 7);
+        ctx.stroke();
+
+      } else if (data.material === 'balloon') {
+        // 🌟 공중 부유 풍선 (Balloon)
+        const balloonGrad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+        balloonGrad.addColorStop(0, '#fda4af');
+        balloonGrad.addColorStop(0.65, '#f43f5e');
+        balloonGrad.addColorStop(1, '#9f1239');
+        ctx.fillStyle = balloonGrad;
+        ctx.strokeStyle = '#881337';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, -2, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 풍선 주둥이 매듭
+        ctx.fillStyle = '#be123c';
+        ctx.beginPath();
+        ctx.moveTo(-4, r - 2);
+        ctx.lineTo(4, r - 2);
+        ctx.lineTo(0, r + 5);
+        ctx.closePath();
+        ctx.fill();
+
+        // 광택 하이라이트
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.beginPath();
+        ctx.arc(-r * 0.32, -r * 0.35, r * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else {
+        // 롤링 바위 (Boulder)
+        const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+        grad.addColorStop(0, '#64748b');
+        grad.addColorStop(0.65, '#334155');
+        grad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+        ctx.beginPath();
+        ctx.arc(-r * 0.3, r * 0.22, r * 0.24, 0, Math.PI * 2);
+        ctx.arc(r * 0.28, -r * 0.25, r * 0.2, 0, Math.PI * 2);
+        ctx.arc(r * 0.12, r * 0.36, r * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+        ctx.beginPath();
+        ctx.arc(-r * 0.35, -r * 0.35, r * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       ctx.restore();
       return;
@@ -1773,35 +2048,159 @@ class AngryBirdsGame {
     const hw = data.w / 2;
     const hh = data.h / 2;
 
-    ctx.fillStyle = mat.fill;
-    ctx.strokeStyle = mat.stroke;
-    ctx.lineWidth = 2.5;
-    ctx.fillRect(-hw, -hh, data.w, data.h);
-    ctx.strokeRect(-hw, -hh, data.w, data.h);
+    // 2. 포털 워프 게이트 (Portal In / Portal Out)
+    if (data.material === 'portal_in' || data.material === 'portal_out') {
+      const isEntrance = data.material === 'portal_in';
+      const mainCol = isEntrance ? '#38bdf8' : '#f97316';
+      const coreCol = isEntrance ? '#0284c7' : '#ea580c';
+      const spin = data.spin || 0;
 
-    if (data.material === 'tnt') {
-      // TNT 표기
-      ctx.fillStyle = '#fef3c7';
-      ctx.fillRect(-hw + 4, -9, data.w - 8, 18);
-      ctx.fillStyle = '#dc2626';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('TNT', 0, 1);
-    } else if (data.material === 'wood') {
-      // 나뭇결 장식선
-      ctx.strokeStyle = 'rgba(120, 53, 15, 0.35)';
-      ctx.lineWidth = 1.5;
+      // 외곽 네온 광선 링
+      ctx.shadowColor = mainCol;
+      ctx.shadowBlur = 18;
+      ctx.strokeStyle = mainCol;
+      ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.moveTo(-hw + 4, 0);
-      ctx.lineTo(hw - 4, 0);
+      ctx.ellipse(0, 0, hw + 4, hh + 4, 0, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // 중심부 암흑 타원
+      ctx.fillStyle = '#030712';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, hw, hh, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 내부 회전하는 에너지 소용돌이
+      ctx.save();
+      ctx.rotate(spin);
+      ctx.strokeStyle = coreCol;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, hw * 0.75, hh * 0.6, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.rotate(-spin * 2);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, hw * 0.45, hh * 0.35, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.restore();
+      return;
+    }
+
+    // 3. 스프링 점프대 기믹 (Spring)
+    if (data.material === 'spring') {
+      const comp = (data.compressTimer || 0) * 0.55;
+      const springH = data.h * (1 - comp);
+
+      // 하단 강철 받침대
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-hw, hh - 6, data.w, 6);
+
+      // 가운데 지그재그 용수철 코일
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-hw * 0.6, hh - 6);
+      ctx.lineTo(hw * 0.5, hh - 6 - springH * 0.3);
+      ctx.lineTo(-hw * 0.5, hh - 6 - springH * 0.65);
+      ctx.lineTo(hw * 0.4, -hh * (1 - comp) + 6);
+      ctx.stroke();
+
+      // 상단 레드 탄성 바운스 플레이트
+      ctx.fillStyle = '#ef4444';
+      ctx.strokeStyle = '#991b1b';
+      ctx.lineWidth = 2.5;
+      ctx.fillRect(-hw, -hh * (1 - comp), data.w, 8);
+      ctx.strokeRect(-hw, -hh * (1 - comp), data.w, 8);
+
+      ctx.restore();
+      return;
+    }
+
+    // 4. 크리스탈 / 강철 / 기본 사각 블록 렌더링
+    if (data.material === 'crystal') {
+      // 🌟 영롱한 보석 크리스탈 (Crystal)
+      const cGrad = ctx.createLinearGradient(-hw, -hh, hw, hh);
+      cGrad.addColorStop(0, '#f0abfc');
+      cGrad.addColorStop(0.5, '#c084fc');
+      cGrad.addColorStop(1, '#7e22ce');
+      ctx.fillStyle = cGrad;
+      ctx.strokeStyle = '#fae8ff';
+      ctx.lineWidth = 2.5;
+      ctx.fillRect(-hw, -hh, data.w, data.h);
+      ctx.strokeRect(-hw, -hh, data.w, data.h);
+
+      // 크리스탈 다이아몬드 각면 반사선
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-hw, 0);
+      ctx.lineTo(0, -hh);
+      ctx.lineTo(hw, 0);
+      ctx.lineTo(0, hh);
+      ctx.closePath();
+      ctx.stroke();
+
+    } else if (data.material === 'steel') {
+      // 🌟 중장비 강철 철골 빔 (Steel Beam)
+      ctx.fillStyle = '#334155';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 3;
+      ctx.fillRect(-hw, -hh, data.w, data.h);
+      ctx.strokeRect(-hw, -hh, data.w, data.h);
+
+      // 강철 모서리 4점 볼트/리벳
+      ctx.fillStyle = '#94a3b8';
+      [-hw + 6, hw - 6].forEach((rx) => {
+        [-hh + 6, hh - 6].forEach((ry) => {
+          ctx.beginPath();
+          ctx.arc(rx, ry, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      });
+
+      // 중앙 H-빔 홈선
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-hw + 8, -hh + 8, data.w - 16, data.h - 16);
+
+    } else {
+      // 기본 나무, 얼음, 돌, TNT
+      ctx.fillStyle = mat.fill;
+      ctx.strokeStyle = mat.stroke;
+      ctx.lineWidth = 2.5;
+      ctx.fillRect(-hw, -hh, data.w, data.h);
+      ctx.strokeRect(-hw, -hh, data.w, data.h);
+
+      if (data.material === 'tnt') {
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(-hw + 4, -9, data.w - 8, 18);
+        ctx.fillStyle = '#dc2626';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('TNT', 0, 1);
+      } else if (data.material === 'wood') {
+        ctx.strokeStyle = 'rgba(120, 53, 15, 0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-hw + 4, 0);
+        ctx.lineTo(hw - 4, 0);
+        ctx.stroke();
+      }
     }
 
     // 체력 감소 시 균열(Crack) 표시
     const hpRatio = data.hp / data.maxHp;
     if (hpRatio < 0.72) {
-      ctx.strokeStyle = mat.crackColor;
+      ctx.strokeStyle = mat.crackColor || '#ffffff';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(-hw * 0.4, -hh * 0.5);
@@ -1826,6 +2225,52 @@ class AngryBirdsGame {
     ctx.translate(body.position.x, body.position.y);
     ctx.rotate(body.angle);
 
+    // 🌟 풍선 비행 돼지: 정수리에 달린 실과 헬륨 풍선
+    if (data.role === 'balloon_pig') {
+      ctx.save();
+      // 풍선 실 끈
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -r);
+      ctx.quadraticCurveTo(6, -r - 22, 0, -r - 46);
+      ctx.stroke();
+
+      // 상공 헬륨 풍선 (격추되지 않았을 때)
+      if (data.isFloating) {
+        const bgGrad = ctx.createRadialGradient(-5, -r - 54, 3, 0, -r - 46, 18);
+        bgGrad.addColorStop(0, '#fda4af');
+        bgGrad.addColorStop(0.65, '#f43f5e');
+        bgGrad.addColorStop(1, '#9f1239');
+        ctx.fillStyle = bgGrad;
+        ctx.strokeStyle = '#881337';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, -r - 46, 17, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 풍선 매듭
+        ctx.fillStyle = '#be123c';
+        ctx.beginPath();
+        ctx.moveTo(-3, -r - 29);
+        ctx.lineTo(3, -r - 29);
+        ctx.lineTo(0, -r - 24);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 🌟 우주비행사 돼지: 배낭 산소통
+    if (data.role === 'astronaut') {
+      ctx.fillStyle = '#94a3b8';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.fillRect(-r * 1.25, -r * 0.55, r * 0.35, r * 1.1);
+      ctx.strokeRect(-r * 1.25, -r * 0.55, r * 0.35, r * 1.1);
+    }
+
     // 귀
     ctx.fillStyle = '#4ade80';
     ctx.strokeStyle = '#15803d';
@@ -1836,14 +2281,14 @@ class AngryBirdsGame {
     ctx.fill();
     ctx.stroke();
 
-    // 초록 돼지 몸통
-    ctx.fillStyle = '#4ade80';
+    // 초록 돼지 몸통 (골렘은 암석 판금 느낌)
+    ctx.fillStyle = data.role === 'golem' ? '#22c55e' : '#4ade80';
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    // 멍든 자국 (체력이 깎였을 때)
+    // 멍든 자국
     if (hpRatio < 0.65) {
       ctx.fillStyle = 'rgba(109, 40, 217, 0.42)';
       ctx.beginPath();
@@ -1851,8 +2296,9 @@ class AngryBirdsGame {
       ctx.fill();
     }
 
-    // 헬멧 피그 철모 또는 킹피그 왕관
+    // 🌟 역할별 고유 장비 및 투구
     if (data.role === 'helmet') {
+      // 일반 철모
       ctx.fillStyle = '#64748b';
       ctx.strokeStyle = '#334155';
       ctx.beginPath();
@@ -1860,9 +2306,12 @@ class AngryBirdsGame {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+
     } else if (data.role === 'king') {
+      // 👑 보스 킹피그 황금 왕관
       ctx.fillStyle = '#facc15';
       ctx.strokeStyle = '#854d0e';
+      ctx.lineWidth = 2.8;
       ctx.beginPath();
       ctx.moveTo(-r * 0.65, -r * 0.78);
       ctx.lineTo(-r * 0.45, -r * 1.35);
@@ -1872,20 +2321,105 @@ class AngryBirdsGame {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+
+    } else if (data.role === 'golem') {
+      // 🗿 거대 골렘 돼지: 암석 투구 + 뾰족한 돌 뿔 2개
+      ctx.fillStyle = '#475569';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.1, r * 1.1, Math.PI * 0.95, Math.PI * 0.05);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 암석 뿔 좌우 2개
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.7, -r * 0.75);
+      ctx.lineTo(-r * 1.05, -r * 1.4);
+      ctx.lineTo(-r * 0.35, -r * 0.95);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(r * 0.7, -r * 0.75);
+      ctx.lineTo(r * 1.05, -r * 1.4);
+      ctx.lineTo(r * 0.35, -r * 0.95);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+    } else if (data.role === 'wizard') {
+      // 🔮 마법사 돼지: 보라색 고깔모자 + 황금 별
+      ctx.fillStyle = '#7c3aed';
+      ctx.strokeStyle = '#4c1d95';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.8, -r * 0.65);
+      ctx.lineTo(0, -r * 1.7);
+      ctx.lineTo(r * 0.8, -r * 0.65);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 모자 챙
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.65, r * 0.95, r * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 황금 별 장식
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, -r * 1.05, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+    } else if (data.role === 'astronaut') {
+      // 👨‍🚀 우주비행사 돼지: 투명 유리 돔 헬멧
+      ctx.fillStyle = 'rgba(186, 230, 253, 0.32)';
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 유리 반사광 초승달
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.1, -Math.PI * 0.7, -Math.PI * 0.25);
+      ctx.stroke();
     }
 
-    // 눈
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(-r * 0.42, -r * 0.1, r * 0.23, 0, Math.PI * 2);
-    ctx.arc(r * 0.42, -r * 0.1, r * 0.23, 0, Math.PI * 2);
-    ctx.fill();
+    // 눈 (골렘은 붉은 눈, 일반은 흰자+검은자)
+    if (data.role === 'golem') {
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-r * 0.42, -r * 0.1, r * 0.22, 0, Math.PI * 2);
+      ctx.arc(r * 0.42, -r * 0.1, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.arc(-r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
-    ctx.arc(r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#7f1d1d';
+      ctx.beginPath();
+      ctx.arc(-r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.arc(r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-r * 0.42, -r * 0.1, r * 0.23, 0, Math.PI * 2);
+      ctx.arc(r * 0.42, -r * 0.1, r * 0.23, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(-r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.arc(r * 0.42, -r * 0.1, r * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // 돼지 코 (Snout)
     ctx.fillStyle = '#86efac';
