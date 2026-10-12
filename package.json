@@ -1,0 +1,22 @@
+{
+  "name": "angry-birds-pwa",
+  "version": "1.0.0",
+  "description": "스마트폰 명작 앵그리버드(Angry Birds) PWA 에디션 - Matter.js 물리 엔진 & Web Audio API 사운드 합성 탑재",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx --yes serve . -l 3000",
+    "dev": "npx --yes serve . -l 3000"
+  },
+  "keywords": [
+    "angry-birds",
+    "pwa",
+    "matter-js",
+    "web-audio-api",
+    "game"
+  ],
+  "author": "Vibe Coding Partner",
+  "license": "MIT",
+  "dependencies": {
+    "matter-js": "^0.20.0"
+  }
+}

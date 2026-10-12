@@ -1,0 +1,32 @@
+{
+  "name": "앵그리버드 PWA - Angry Birds Vibe Edition",
+  "short_name": "앵그리버드",
+  "description": "Matter.js 2D 물리 엔진과 Web Audio API 실시간 사운드 합성이 탑재된 앵그리버드 PWA 게임",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0f172a",
+  "theme_color": "#dc2626",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "./public/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./public/icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./public/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

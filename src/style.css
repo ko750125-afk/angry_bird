@@ -1,0 +1,351 @@
+/* src/style.css - 앵그리버드 PWA 아케이드 UI 스타일 */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+  color: #f8fafc;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 9;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.14);
+  background: #0284c7;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+
+#gameCanvas:active {
+  cursor: grabbing;
+}
+
+/* 상단 HUD 오버레이 */
+.hud-top {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-brand {
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 2px solid rgba(250, 204, 21, 0.45);
+  pointer-events: auto;
+}
+
+.hud-stage-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fde047;
+  letter-spacing: -0.02em;
+}
+
+.hud-subtitle {
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  margin-top: 2px;
+}
+
+.hud-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  pointer-events: auto;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.stat-value.score {
+  color: #fde047;
+}
+
+.stat-value.pigs {
+  color: #4ade80;
+}
+
+.hud-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  pointer-events: auto;
+}
+
+.hud-btn {
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  color: #f8fafc;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  padding: 8px 13px;
+  border-radius: 11px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hud-btn:hover {
+  transform: translateY(-2px);
+  border-color: #fde047;
+}
+
+.hud-btn:active {
+  transform: translateY(0);
+}
+
+.hud-btn.muted {
+  background: #475569;
+  color: #cbd5e1;
+  opacity: 0.78;
+}
+
+.hud-btn.install-btn {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border-color: #fca5a5;
+}
+
+/* 하단 스킬 안내 배너 */
+.hud-bottom {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 7px 20px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fef08a;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* 모달 공통 */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.78);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.modal-backdrop.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 3px solid #facc15;
+  border-radius: 22px;
+  padding: 28px 34px;
+  width: 90%;
+  max-width: 560px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+}
+
+.modal-title {
+  font-size: 1.9rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.modal-title.win {
+  color: #fde047;
+}
+
+.modal-title.lose {
+  color: #f87171;
+}
+
+.modal-subtitle {
+  font-size: 0.96rem;
+  color: #cbd5e1;
+  margin-bottom: 18px;
+}
+
+.modal-stars {
+  font-size: 3rem;
+  letter-spacing: 8px;
+  margin: 12px 0;
+  color: #facc15;
+  text-shadow: 0 4px 15px rgba(250, 204, 21, 0.5);
+}
+
+.modal-score {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #4ade80;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.action-btn:hover {
+  transform: scale(1.04);
+}
+
+.action-btn.retry {
+  background: #475569;
+  color: #ffffff;
+}
+
+.action-btn.next {
+  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  color: #ffffff;
+}
+
+/* 스테이지 선택 그리드 */
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+
+.stage-card {
+  background: #1e293b;
+  border: 2px solid #475569;
+  border-radius: 14px;
+  padding: 14px 10px;
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.stage-card:hover,
+.stage-card.active {
+  transform: translateY(-3px);
+  border-color: #facc15;
+  background: #334155;
+}
+
+.stage-num {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.stage-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  margin: 4px 0;
+  color: #ffffff;
+}
+
+.stage-stars {
+  font-size: 1.2rem;
+  color: #facc15;
+  margin: 4px 0;
+}
+
+.stage-high {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.stage-badge {
+  margin-top: 6px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+
+@media (max-width: 900px) {
+  .hud-subtitle {
+    display: none;
+  }
+  .hud-btn {
+    padding: 6px 9px;
+    font-size: 0.74rem;
+  }
+  .hud-bottom {
+    font-size: 0.74rem;
+    padding: 5px 14px;
+  }
+}
