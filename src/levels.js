@@ -765,12 +765,16 @@
         // 중앙 받침점 피벗 (Fulcrum)
         box(880, GROUND_Y, 44, 150, 'stone', true),
 
+        // 🌟 시작 시 자멸 방지: 좌우 끝단 안전 버팀목 (타격 시에만 부서지며 시소 작동!)
+        box(740, GROUND_Y, 32, 150, 'wood'),
+        box(1020, GROUND_Y, 32, 150, 'wood'),
+
         // 시소 메인 가로 빔 (길이 340)
         box(880, 430, 340, 22, 'wood'),
 
-        // 왼쪽 날개 (X: 740): 무거운 대형 롤링 바위 & TNT
-        boulder(740, 408, 30),
-        box(740, 408 - 60, 44, 44, 'tnt'),
+        // 왼쪽 날개 (X: 740): 대형 롤링 바위 & TNT
+        boulder(740, 408, 28),
+        box(740, 408 - 56, 44, 44, 'tnt'),
 
         // 오른쪽 날개 (X: 980 ~ 1040): 취약한 얼음 & 크리스탈 탑
         box(960, 408, 22, 90, 'ice'),
@@ -810,10 +814,10 @@
         box(750, 450, 130, 20, 'stone', true),
         box(870, 530, 130, 20, 'stone', true),
 
-        // 꼭대기 바위 지지대 (이것만 부수면 바위 2개가 연쇄 슬라이드!)
-        box(570, 270, 16, 50, 'wood'),
-        boulder(510, 270, 30),
-        boulder(450, 270, 28),
+        // 🌟 시작 시 자연 굴러떨어짐 방지: 튼튼한 목조 정지목 (Stopper)
+        box(560, 270, 28, 55, 'wood'),
+        boulder(490, 270, 28),
+        boulder(430, 270, 26),
 
         // 지상 볼링 핀 대열 (X: 960, 1040, 1120)
         box(960, GROUND_Y, 20, 90, 'ice'),
@@ -893,10 +897,13 @@
       threeStarScore: 48000,
       twoStarScore: 33000,
       blocks: [
+        // 🌟 젠가 하부 기초 슬래브 (Static 고정으로 스폰 직후 흔들림 원천 차단)
+        box(860, GROUND_Y, 150, 24, 'stone', true),
+
         // 1단 기단 (X: 860)
-        box(820, GROUND_Y, 22, 90, 'stone'),
-        box(900, GROUND_Y, 22, 90, 'stone'),
-        box(860, 490, 120, 20, 'stone'),
+        box(820, 556, 26, 80, 'stone'),
+        box(900, 556, 26, 80, 'stone'),
+        box(860, 476, 120, 20, 'stone'),
 
         // 2단 젠가 (취약한 유리/얼음)
         box(860, 470, 24, 80, 'ice'),
@@ -1234,6 +1241,492 @@
         pig(980, 274, 38, 'king'), // 👑 3층 최후의 슈퍼 킹피그!
         pig(820, GROUND_Y, 22, 'helmet'),
         pig(1100, GROUND_Y, 22, 'helmet')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 21 : 🏗️ 크레인 크레들 & 철골 행거 (Ironworks Crane Hangar)
+    // 기믹: [신규 패턴] 완전 대칭 자립형 산업용 트러스 크레인 암 붕괴
+    // =========================================================================
+    {
+      id: 21,
+      theme: 'industrial',
+      skyTheme: 'industrial',
+      title: 'STAGE 21 : 🏗️ 크레인 크레들 & 철골 행거',
+      subtitle: '대칭 하중으로 완벽히 안정된 산업용 크레인! 중심 케이블 래치를 부숴 하부 벙커를 덮치세요!',
+      badge: '크레인 암 / 트러스 역학 붕괴',
+      gravityY: 1.0,
+      birds: ['black', 'yellow', 'big', 'white'],
+      threeStarScore: 54000,
+      twoStarScore: 36000,
+      blocks: [
+        // 광폭 안정 기초 바닥 슬래브 (Static)
+        box(840, GROUND_Y, 260, 22, 'steel', true),
+
+        // 1층 대칭 강철 기둥 & 중앙 슬래브
+        steel(740, 558, 28, 120),
+        steel(940, 558, 28, 120),
+        box(840, 438, 240, 22, 'steel'),
+
+        // 2층 크레인 트러스 & 상부 암
+        steel(780, 416, 26, 100),
+        steel(900, 416, 26, 100),
+        box(840, 316, 200, 22, 'steel'),
+
+        // 상판 크레들 위 바위 2개 (홈 안착)
+        boulder(800, 294, 24),
+        boulder(880, 294, 24),
+
+        // 1층 중앙 화학 TNT
+        box(840, 558, 44, 44, 'tnt'),
+
+        // 황금알
+        goldenEgg(840, 230)
+      ],
+      pigs: [
+        pig(840, 416, 24, 'helmet'),
+        pig(780, 558, 22, 'normal'),
+        pig(900, 558, 22, 'normal'),
+        pig(840, 294, 23, 'helmet')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 22 : 🏺 피라미드 스핑크스 성전 (Pharaoh Sphinx Temple)
+    // 기믹: [신규 패턴] 바닥이 넓은 3단 대칭 계단 피라미드 (자립 안정성 100%)
+    // =========================================================================
+    {
+      id: 22,
+      theme: 'egypt',
+      skyTheme: 'egypt',
+      title: 'STAGE 22 : 🏺 피라미드 스핑크스 성전',
+      subtitle: '광폭 계단 피라미드 구조! 내부 지지 기둥을 분쇄하여 상단 피라미드가 파라오를 매몰시키게 하세요!',
+      badge: '피라미드 / 광폭 계단 성전',
+      gravityY: 1.0,
+      birds: ['yellow', 'black', 'big', 'red'],
+      threeStarScore: 62000,
+      twoStarScore: 42000,
+      blocks: [
+        // 1단 광폭 기둥 (폭 340)
+        box(760, GROUND_Y, 32, 110, 'stone'),
+        box(860, GROUND_Y, 28, 110, 'stone'),
+        box(940, GROUND_Y, 28, 110, 'stone'),
+        box(1040, GROUND_Y, 32, 110, 'stone'),
+        box(900, 470, 340, 22, 'stone'),
+
+        // 2단 (폭 200)
+        box(820, 448, 26, 95, 'stone'),
+        box(980, 448, 26, 95, 'stone'),
+        box(900, 353, 200, 22, 'stone'),
+
+        // 3단 파라오 왕실
+        crystal(860, 331, 24, 85),
+        crystal(940, 331, 24, 85),
+        box(900, 246, 120, 20, 'stone'),
+
+        // 내부 TNT 2개
+        box(860, GROUND_Y, 44, 44, 'tnt'),
+        box(940, GROUND_Y, 44, 44, 'tnt'),
+
+        // 전설의 호루스 황금알
+        goldenEgg(900, 190)
+      ],
+      pigs: [
+        pig(900, 448, 34, 'king'), // 👑 파라오 킹피그
+        pig(810, GROUND_Y, 23, 'helmet'),
+        pig(990, GROUND_Y, 23, 'helmet'),
+        pig(900, 331, 22, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 23 : 💎 크리스탈 동굴 종유석 (Crystal Stalactite Cavern)
+    // 기믹: [신규 패턴] 상공 고정 암반에 매달린 종유석 쐐기 낙하
+    // =========================================================================
+    {
+      id: 23,
+      theme: 'cavern',
+      skyTheme: 'cavern',
+      title: 'STAGE 23 : 💎 크리스탈 동굴 종유석',
+      subtitle: '천장에 매달린 크리스탈 종유석 지지목을 끊어, 거대 바위 쐐기를 지상 기지로 벼락같이 낙하시키세요!',
+      badge: '종유석 기믹 / 천장 쐐기 낙하',
+      gravityY: 1.0,
+      birds: ['blue', 'yellow', 'white', 'black'],
+      threeStarScore: 56000,
+      twoStarScore: 38000,
+      blocks: [
+        // 상공 고정 암반 (Static 천장)
+        box(860, 180, 280, 24, 'stone', true),
+
+        // 매달린 종유석 쐐기 장치 (지지목만 부수면 낙하!)
+        box(860, 204, 24, 40, 'wood'),
+        crystal(860, 260, 80, 30),
+        boulder(860, 290, 28),
+
+        // 지상 크리스탈 요새 (X: 740 ~ 980)
+        crystal(760, GROUND_Y, 26, 120),
+        box(860, GROUND_Y, 24, 120, 'ice'),
+        crystal(960, GROUND_Y, 26, 120),
+        box(860, 460, 240, 20, 'crystal'),
+
+        // 1층 내부 TNT
+        box(860, GROUND_Y, 44, 44, 'tnt'),
+
+        // 황금알
+        goldenEgg(860, 430)
+      ],
+      pigs: [
+        pig(760, 440, 22, 'normal'),
+        pig(860, GROUND_Y, 24, 'wizard'),
+        pig(960, 440, 22, 'normal'),
+        pig(860, 330, 23, 'helmet')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 24 : 🏯 천수각 삼중 누각 성벽 (Three-Tier Samurai Fortress)
+    // 기믹: [신규 패턴] 광폭 기와 지붕 4기둥 지지의 안정적인 천수각
+    // =========================================================================
+    {
+      id: 24,
+      theme: 'oriental',
+      skyTheme: 'oriental',
+      title: 'STAGE 24 : 🏯 천수각 삼중 누각 성벽',
+      subtitle: '대칭 4기둥으로 견고하게 선 삼중 누각! 척의 돌진으로 각 층의 특정 기둥만 꺾어 차례대로 무너뜨리세요!',
+      badge: '천수각 / 3중 누각 층별 공략',
+      gravityY: 1.0,
+      birds: ['yellow', 'yellow', 'white', 'big'],
+      threeStarScore: 60000,
+      twoStarScore: 40000,
+      blocks: [
+        // 1층 (폭 310)
+        box(780, GROUND_Y, 26, 110, 'stone'),
+        box(860, GROUND_Y, 24, 110, 'wood'),
+        box(940, GROUND_Y, 24, 110, 'wood'),
+        box(1020, GROUND_Y, 26, 110, 'stone'),
+        box(900, 470, 310, 22, 'wood'),
+
+        // 2층 (폭 210)
+        box(820, 448, 22, 95, 'wood'),
+        box(980, 448, 22, 95, 'wood'),
+        box(900, 353, 210, 20, 'wood'),
+
+        // 3층 망루
+        crystal(860, 333, 20, 80),
+        crystal(940, 333, 20, 80),
+        box(900, 253, 130, 18, 'ice'),
+
+        // 1층 TNT & 지붕 바위
+        box(900, GROUND_Y, 44, 44, 'tnt'),
+        boulder(900, 233, 24),
+        goldenEgg(900, 180)
+      ],
+      pigs: [
+        pig(820, GROUND_Y, 23, 'helmet'),
+        pig(980, GROUND_Y, 23, 'helmet'),
+        pig(900, 448, 30, 'golem'), // 🪨 사무라이 골렘
+        pig(900, 333, 22, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 25 : 🏭 파이프라인 정유 공장 (Chemical Refinery)
+    // 기믹: [신규 패턴] 수평 3단 릴레이 폭발 파이프라인 랙 (가로 격자 지지)
+    // =========================================================================
+    {
+      id: 25,
+      theme: 'chemical',
+      skyTheme: 'chemical',
+      title: 'STAGE 25 : 🏭 파이프라인 정유 공장',
+      subtitle: '수평 3단 화학 파이프라인! 좌측 탱크를 기폭시켜 도미노처럼 우측 정유탑까지 릴레이 폭발시키세요!',
+      badge: '정유 공장 / 릴레이 화학 폭발',
+      gravityY: 1.0,
+      birds: ['black', 'black', 'yellow', 'blue'],
+      threeStarScore: 68000,
+      twoStarScore: 46000,
+      blocks: [
+        // 1단 지상 랙 기둥 4개 (폭 460)
+        steel(720, GROUND_Y, 28, 120),
+        steel(860, GROUND_Y, 28, 120),
+        steel(1000, GROUND_Y, 28, 120),
+        steel(1140, GROUND_Y, 28, 120),
+        box(930, 460, 460, 22, 'steel'),
+
+        // 1단 사이사이 화학 TNT 3개
+        box(790, GROUND_Y, 46, 46, 'tnt'),
+        box(930, GROUND_Y, 46, 46, 'tnt'),
+        box(1070, GROUND_Y, 46, 46, 'tnt'),
+
+        // 2단 파이프 랙
+        box(790, 438, 22, 90, 'wood'),
+        box(930, 438, 22, 90, 'wood'),
+        box(1070, 438, 22, 90, 'wood'),
+        box(930, 348, 320, 20, 'steel'),
+
+        // 2단 TNT
+        box(930, 438, 44, 44, 'tnt'),
+
+        // 3단 굴뚝
+        box(930, 328, 26, 80, 'stone'),
+        goldenEgg(930, 220)
+      ],
+      pigs: [
+        pig(790, 438, 23, 'helmet'),
+        pig(1070, 438, 23, 'helmet'),
+        pig(930, 328, 24, 'wizard'),
+        pig(720, GROUND_Y, 21, 'normal'),
+        pig(1140, GROUND_Y, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 26 : 🚀 발사대 로켓 갠트리 타워 (Rocket Launch Gantry)
+    // 기믹: [신규 패턴] 직립 로켓과 점검 타워 (초안정 직립 거치)
+    // =========================================================================
+    {
+      id: 26,
+      theme: 'spaceport',
+      skyTheme: 'spaceport',
+      title: 'STAGE 26 : 🚀 발사대 로켓 갠트리 타워',
+      subtitle: '발사 대기 중인 로켓! 부스터 연결 핀을 파괴하여 로켓 본체가 관제탑으로 덮치게 만드세요!',
+      badge: '로켓 갠트리 / 부스터 폭격',
+      gravityY: 1.0,
+      birds: ['yellow', 'black', 'white', 'big'],
+      threeStarScore: 58000,
+      twoStarScore: 39000,
+      blocks: [
+        // 좌측 갠트리 타워 (X: 740)
+        steel(710, GROUND_Y, 24, 150),
+        steel(770, GROUND_Y, 24, 150),
+        box(740, 430, 90, 22, 'steel'),
+        steel(740, 408, 22, 110),
+        box(740, 298, 80, 20, 'steel'),
+
+        // 중앙 로켓 본체 (X: 880)
+        box(855, GROUND_Y, 44, 44, 'tnt'),
+        box(905, GROUND_Y, 44, 44, 'tnt'),
+        steel(880, 492, 60, 110),
+        crystal(880, 382, 48, 100),
+        boulder(880, 282, 26),
+
+        // 우측 관제 벙커 (X: 1040)
+        box(1000, GROUND_Y, 26, 120, 'stone'),
+        box(1080, GROUND_Y, 26, 120, 'stone'),
+        box(1040, 460, 120, 22, 'stone'),
+
+        // 황금알
+        goldenEgg(880, 220)
+      ],
+      pigs: [
+        pig(740, 278, 23, 'astronaut'),
+        pig(880, 382, 24, 'astronaut'),
+        pig(1040, GROUND_Y, 23, 'helmet'),
+        pig(1040, 438, 22, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 27 : 🏰 듀얼 캐슬 성문 도하 (Twin Bastion Drawbridge)
+    // 기믹: [신규 패턴] 좌우 쌍둥이 성채 사이에 걸쳐진 중앙 도개교 절단
+    // =========================================================================
+    {
+      id: 27,
+      theme: 'medieval',
+      skyTheme: 'medieval',
+      title: 'STAGE 27 : 🏰 듀얼 캐슬 성문 도하',
+      subtitle: '두 성채 사이에 얹혀진 거대 도개교! 중앙 연결부를 폭탄새로 절단하여 양쪽 성채를 안쪽으로 붕괴시키세요!',
+      badge: '듀얼 캐슬 / 도개교 중앙 절단',
+      gravityY: 1.0,
+      birds: ['blue', 'black', 'yellow', 'white'],
+      threeStarScore: 64000,
+      twoStarScore: 43000,
+      blocks: [
+        // 좌측 성채 (X: 720)
+        box(680, GROUND_Y, 28, 140, 'stone'),
+        box(760, GROUND_Y, 28, 140, 'stone'),
+        box(720, 440, 110, 22, 'stone'),
+        boulder(720, 418, 26),
+
+        // 우측 성채 (X: 1060)
+        box(1020, GROUND_Y, 28, 140, 'stone'),
+        box(1100, GROUND_Y, 28, 140, 'stone'),
+        box(1060, 440, 110, 22, 'stone'),
+        boulder(1060, 418, 26),
+
+        // 중앙 연결 도개교 (폭 220)
+        box(890, 440, 220, 20, 'wood'),
+        box(890, 420, 44, 44, 'tnt'),
+
+        // 지상 해자 TNT
+        box(890, GROUND_Y, 44, 44, 'tnt'),
+        goldenEgg(890, 340)
+      ],
+      pigs: [
+        pig(720, 418, 23, 'helmet'),
+        pig(1060, 418, 23, 'helmet'),
+        pig(890, 420, 32, 'golem'), // 🪨 도개교 수문장 골렘
+        pig(890, GROUND_Y, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 28 : 🕸️ 거미줄 육각 하이브 (Hexagonal Cyber Hive)
+    // 기믹: [신규 패턴] 완벽한 구조역학 안정 트러스 육각 격자 하이브
+    // =========================================================================
+    {
+      id: 28,
+      theme: 'cyberhive',
+      skyTheme: 'cyberhive',
+      title: 'STAGE 28 : 🕸️ 거미줄 육각 하이브',
+      subtitle: '구조역학상 흔들림이 전혀 없는 육각 트러스 하이브! 셀 내부의 핵심 급소들을 차례대로 관통하세요!',
+      badge: '육각 하이브 / 트러스 안정 구조',
+      gravityY: 1.0,
+      birds: ['blue', 'yellow', 'white', 'black', 'big'],
+      threeStarScore: 66000,
+      twoStarScore: 45000,
+      blocks: [
+        // 1층 기둥 3개 (폭 280)
+        steel(780, GROUND_Y, 26, 120),
+        crystal(900, GROUND_Y, 26, 120),
+        steel(1020, GROUND_Y, 26, 120),
+        box(840, 460, 130, 20, 'crystal'),
+        box(960, 460, 130, 20, 'crystal'),
+
+        // 2층 하이브
+        crystal(840, 440, 24, 100),
+        steel(960, 440, 24, 100),
+        box(900, 340, 150, 20, 'steel'),
+
+        // 1층 내부 TNT
+        box(840, GROUND_Y, 42, 42, 'tnt'),
+        box(960, GROUND_Y, 42, 42, 'tnt'),
+
+        // 3층 코어
+        crystal(900, 320, 22, 80),
+        goldenEgg(900, 220)
+      ],
+      pigs: [
+        pig(840, 440, 24, 'wizard'),
+        pig(960, 440, 23, 'helmet'),
+        pig(900, GROUND_Y, 24, 'astronaut'),
+        pig(900, 320, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 29 : 🌋 용암 협곡 철교 (Lava Gorge Railroad Bridge)
+    // 기믹: [신규 패턴] 절벽 사이 걸쳐진 트러스 철교 & 교각 파괴 시 V자 추락
+    // =========================================================================
+    {
+      id: 29,
+      theme: 'volcano',
+      skyTheme: 'volcano',
+      title: 'STAGE 29 : 🌋 용암 협곡 철교',
+      subtitle: '용암 협곡 절벽에 걸쳐진 트러스 철교! 중앙 교각을 폭파하여 열차와 적들을 협곡 용암으로 수장시키세요!',
+      badge: '협곡 철교 / 트러스 V자 붕괴',
+      gravityY: 1.0,
+      birds: ['yellow', 'black', 'big', 'white'],
+      threeStarScore: 74000,
+      twoStarScore: 50000,
+      blocks: [
+        // 좌우 고정 절벽 암벽 (Static)
+        box(680, GROUND_Y, 90, 180, 'stone', true),
+        box(1120, GROUND_Y, 90, 180, 'stone', true),
+
+        // 중앙 지지 교각 2개
+        steel(830, GROUND_Y, 26, 180),
+        steel(970, GROUND_Y, 26, 180),
+
+        // 철교 메인 상판 (길이 460)
+        box(900, 400, 460, 24, 'steel'),
+
+        // 철교 위 화물칸 TNT & 바위
+        box(780, 376, 44, 44, 'tnt'),
+        boulder(900, 376, 26),
+        box(1020, 376, 44, 44, 'tnt'),
+
+        // 용암 바닥 TNT
+        box(900, GROUND_Y, 46, 46, 'tnt'),
+        goldenEgg(900, 290)
+      ],
+      pigs: [
+        pig(780, 376, 23, 'helmet'),
+        pig(900, 376, 32, 'golem'), // 🪨 열차 수송 골렘
+        pig(1020, 376, 23, 'helmet'),
+        pig(900, GROUND_Y, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 30 : 👑 불멸의 펜타곤 콜로세움 (The Immortal Colosseum)
+    // 기믹: [30스테이지 초대형 완결판] 5각 대칭 콜로세움 + 보스 올스타 + 6종 버드 총력전
+    // =========================================================================
+    {
+      id: 30,
+      theme: 'colosseum',
+      skyTheme: 'colosseum',
+      title: 'STAGE 30 : 👑 불멸의 펜타곤 콜로세움',
+      subtitle: '대망의 30스테이지 완결! 5각 대칭 불멸의 콜로세움 요새에서 황제 킹피그와 최후의 결전을 벌이세요!',
+      badge: '궁극의 완결판 / 불멸의 콜로세움 대단원',
+      gravityY: 1.0,
+      birds: ['red', 'yellow', 'blue', 'black', 'white', 'big'],
+      threeStarScore: 99000,
+      twoStarScore: 70000,
+      blocks: [
+        // 워프 포털 1쌍 & 전방 공성 점프대
+        portal(520, 360, 28, 95, 'portal_in', 'p_out'),
+        portal(1000, 130, 28, 95, 'portal_out', 'p_in'),
+        spring(620, GROUND_Y, 86, 24),
+
+        // 1층 콜로세움 외벽 기둥 5개 (폭 440)
+        steel(760, GROUND_Y, 28, 140),
+        box(860, GROUND_Y, 28, 140, 'stone'),
+        steel(960, GROUND_Y, 28, 140),
+        box(1060, GROUND_Y, 28, 140, 'stone'),
+        steel(1160, GROUND_Y, 28, 140),
+
+        // 1층 슬래브
+        box(810, 440, 120, 22, 'stone'),
+        box(910, 440, 120, 22, 'steel'),
+        box(1010, 440, 120, 22, 'steel'),
+        box(1110, 440, 120, 22, 'stone'),
+
+        // 1층 무기고 TNT 4연발
+        box(810, GROUND_Y, 44, 44, 'tnt'),
+        box(910, GROUND_Y, 44, 44, 'tnt'),
+        box(1010, GROUND_Y, 44, 44, 'tnt'),
+        box(1110, GROUND_Y, 44, 44, 'tnt'),
+
+        // 2층 콜로세움 회랑
+        crystal(830, 418, 26, 120),
+        steel(910, 418, 26, 120),
+        box(960, 418, 50, 50, 'tnt'),
+        steel(1010, 418, 26, 120),
+        crystal(1090, 418, 26, 120),
+
+        // 2층 천장
+        box(870, 298, 130, 22, 'stone'),
+        box(960, 298, 150, 24, 'stone'),
+        box(1050, 298, 130, 22, 'stone'),
+
+        // 3층 황제 킹피그 왕좌 신전
+        crystal(910, 274, 24, 95),
+        crystal(1010, 274, 24, 95),
+        box(960, 179, 140, 22, 'stone'),
+
+        // 신전 꼭대기 황금 바위 & 찬란한 황금알
+        boulder(960, 157, 28),
+        goldenEgg(960, 80)
+      ],
+      pigs: [
+        pig(660, 210, 22, 'balloon_pig'), // 공중 호위대 1
+        pig(800, 150, 22, 'balloon_pig'), // 공중 호위대 2
+        pig(860, GROUND_Y, 34, 'golem'), // 1층 수문장 골렘
+        pig(910, 418, 25, 'wizard'), // 2층 대마법사
+        pig(1010, 418, 24, 'astronaut'), // 우주비행사
+        pig(960, 274, 38, 'king'), // 👑 3층 불멸의 황제 킹피그!
+        pig(760, GROUND_Y, 22, 'helmet'),
+        pig(1160, GROUND_Y, 22, 'helmet')
       ]
     }
   ];

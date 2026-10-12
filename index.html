@@ -10,13 +10,13 @@
   <meta name="description" content="스마트폰 명작 앵그리버드(Angry Birds) PWA 게임 - 물리 엔진과 실시간 사운드 합성 탑재" />
   <title>앵그리버드 PWA - Angry Birds Vibe Edition</title>
 
-  <link rel="manifest" href="./manifest.json?v=17" />
+  <link rel="manifest" href="./manifest.json?v=18" />
   <link rel="icon" type="image/png" sizes="192x192" href="./public/icons/icon-192.png?v=10" />
   <link rel="icon" type="image/png" sizes="512x512" href="./public/icons/icon-512.png?v=10" />
   <link rel="apple-touch-icon" sizes="180x180" href="./public/icons/apple-touch-icon.png?v=10" />
   <link rel="apple-touch-icon" href="./public/icons/apple-touch-icon.png?v=10" />
   <link rel="shortcut icon" href="./public/icons/icon-192.png?v=10" />
-  <link rel="stylesheet" href="./src/style.css?v=17" />
+  <link rel="stylesheet" href="./src/style.css?v=18" />
 </head>
 <body>
   <div class="app-wrapper">
@@ -90,7 +90,7 @@
     <div id="stageModal" class="modal-backdrop hidden">
       <div class="modal-box">
         <h2 class="modal-title win">🗺️ 스테이지 선택</h2>
-        <p class="modal-subtitle">도전할 스테이지를 선택하세요 (총 20대 버라이어티 스테이지 & 고유 물리 기믹)</p>
+        <p class="modal-subtitle">도전할 스테이지를 선택하세요 (총 30대 버라이어티 스테이지 & 고유 물리 기믹)</p>
         <div id="stageGrid" class="stage-grid"></div>
         <div class="modal-actions">
           <button id="btnCloseStageModal" class="action-btn retry" type="button">닫기</button>
@@ -102,9 +102,9 @@
   <!-- Matter.js 물리 엔진 로컬 번들 (오프라인 완벽 지원) -->
   <script src="./public/vendor/matter.min.js"></script>
   <!-- 사운드 신디사이저, 레벨 데이터, 메인 게임 로직 -->
-  <script src="./src/sound.js"></script>
-  <script src="./src/levels.js"></script>
-  <script src="./src/game.js"></script>
+  <script src="./src/sound.js?v=18"></script>
+  <script src="./src/levels.js?v=18"></script>
+  <script src="./src/game.js?v=18"></script>
 
   <!-- PWA 서비스 워커 등록 및 설치 프롬프트 핸들러 -->
   <script>

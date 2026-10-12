@@ -908,7 +908,16 @@ class SoundEngine {
       cyber: 'neon',
       islands: 'plains',
       fortress: 'volcano',
-      singularity: 'space'
+      singularity: 'space',
+      industrial: 'volcano',
+      egypt: 'desert',
+      cavern: 'glacier',
+      oriental: 'royal',
+      chemical: 'neon',
+      spaceport: 'space',
+      medieval: 'royal',
+      cyberhive: 'neon',
+      colosseum: 'citadel'
     };
     const resolvedTheme = this.currentTheme in THEMES ? this.currentTheme : (themeAliases[this.currentTheme] || 'plains');
     const cfg = THEMES[resolvedTheme] || THEMES.plains;

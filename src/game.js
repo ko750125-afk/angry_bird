@@ -1547,6 +1547,31 @@ class AngryBirdsGame {
       grad.addColorStop(0.35, '#1e1b4b');
       grad.addColorStop(0.7, '#4c0519');
       grad.addColorStop(1, '#f59e0b');
+    } else if (theme === 'industrial' || theme === 'spaceport') {
+      grad.addColorStop(0, '#1c1917');
+      grad.addColorStop(0.4, '#44403c');
+      grad.addColorStop(0.75, '#ea580c');
+      grad.addColorStop(1, '#fde047');
+    } else if (theme === 'egypt' || theme === 'oriental') {
+      grad.addColorStop(0, '#78350f');
+      grad.addColorStop(0.45, '#c2410c');
+      grad.addColorStop(0.8, '#f59e0b');
+      grad.addColorStop(1, '#fef08a');
+    } else if (theme === 'cavern' || theme === 'cyberhive') {
+      grad.addColorStop(0, '#042f2e');
+      grad.addColorStop(0.45, '#0f766e');
+      grad.addColorStop(0.8, '#06b6d4');
+      grad.addColorStop(1, '#67e8f9');
+    } else if (theme === 'chemical') {
+      grad.addColorStop(0, '#022c22');
+      grad.addColorStop(0.4, '#15803d');
+      grad.addColorStop(0.75, '#84cc16');
+      grad.addColorStop(1, '#bef264');
+    } else if (theme === 'medieval' || theme === 'colosseum') {
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.4, '#312e81');
+      grad.addColorStop(0.75, '#b45309');
+      grad.addColorStop(1, '#fde047');
     } else {
       // 10. 에메랄드 초원: 화창한 주간 푸른 하늘
       grad.addColorStop(0, '#0284c7');
@@ -1961,6 +1986,41 @@ class AngryBirdsGame {
       ctx.fillStyle = '#4c0519';
       ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'industrial' || theme === 'spaceport') {
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#78716c';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'egypt' || theme === 'oriental') {
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'cavern' || theme === 'cyberhive') {
+      ctx.fillStyle = '#042f2e';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#22d3ee';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'chemical') {
+      ctx.fillStyle = '#052e16';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#84cc16';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'medieval' || theme === 'colosseum') {
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#facc15';
       ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else {
       // 초원: 싱그러운 녹색 잔디 + 흙 지면 + 야생화 꽃밭
