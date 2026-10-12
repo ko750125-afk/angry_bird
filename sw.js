@@ -1,4 +1,4 @@
-const CACHE_NAME = 'angry-birds-pwa-v6';
+const CACHE_NAME = 'angry-birds-pwa-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
