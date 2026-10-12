@@ -255,45 +255,30 @@ class AngryBirdsGame {
   }
 
   /**
-   * 화면 종횡비에 맞춘 정비율(1:1 정사각형 픽셀) 가상 캔버스 크기 및 지면 위치 보정
+   * 가로 모드(Landscape) 표준 16:9 와이드 해상도(1280x720) 정비율 유지
    */
   _handleResize() {
-    const rect = this.canvas.getBoundingClientRect();
-    const cssW = rect.width || window.innerWidth || 1280;
-    const cssH = rect.height || window.innerHeight || 720;
-    const aspect = cssH / (cssW || 1);
+    this.isPortrait = false;
+    this.virtualW = WORLD_W;
+    this.virtualH = WORLD_H;
+    this.portraitOffsetY = 0;
 
-    // 모바일이거나 세로 모드(aspect >= 1.05)인 경우
-    if (aspect >= 1.05 || window.innerWidth <= 900) {
-      this.isPortrait = true;
-      this.virtualW = WORLD_W; // 가로 폭 1280px 고정 기준
-      // 실제 화면 종횡비에 정확히 맞춘 세로 가상 해상도 (왜곡/찌그러짐 완전 방지)
-      this.virtualH = Math.max(WORLD_H, Math.round(WORLD_W * aspect));
-      // 슬링샷과 타겟 돼지들을 스마트폰 엄지손가락 조작이 가장 편한 화면 하단부로 정렬
-      this.portraitOffsetY = Math.max(0, this.virtualH - WORLD_H - 100);
-    } else {
-      this.isPortrait = false;
-      this.virtualW = WORLD_W;
-      this.virtualH = WORLD_H;
-      this.portraitOffsetY = 0;
-    }
-
-    if (this.canvas.width !== this.virtualW || this.canvas.height !== this.virtualH) {
-      this.canvas.width = this.virtualW;
-      this.canvas.height = this.virtualH;
+    if (this.canvas.width !== WORLD_W || this.canvas.height !== WORLD_H) {
+      this.canvas.width = WORLD_W;
+      this.canvas.height = WORLD_H;
     }
   }
 
   /**
-   * 화면 클릭/터치 좌표를 캔버스 내부 월드 좌표로 변환 (세로 오프셋 및 1:1 보정)
+   * 화면 클릭/터치 좌표를 캔버스 내부 월드 좌표(1280x720)로 정밀 변환
    */
   _getCanvasCoords(clientX, clientY) {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = (this.virtualW || WORLD_W) / (rect.width || 1);
-    const scaleY = (this.virtualH || WORLD_H) / (rect.height || 1);
+    const scaleX = WORLD_W / (rect.width || 1);
+    const scaleY = WORLD_H / (rect.height || 1);
     return {
       x: (clientX - rect.left) * scaleX - this.cameraOffsetX,
-      y: (clientY - rect.top) * scaleY - (this.portraitOffsetY || 0)
+      y: (clientY - rect.top) * scaleY
     };
   }
 
@@ -311,9 +296,8 @@ class AngryBirdsGame {
 
       if (this.state === 'AIMING' && this.currentBird) {
         const dist = Math.hypot(pt.x - SLING_X, pt.y - SLING_Y);
-        // 모바일/세로 화면에서는 터치 조작이 편리하도록 잡기 반경을 130px로 확대
-        const grabRadius = this.isPortrait ? 130 : 75;
-        if (dist <= grabRadius) {
+        // 모바일 가로 모드에서도 엄지손가락 터치가 쾌적하도록 반경 85px 제공
+        if (dist <= 85) {
           this.isOverviewMode = false;
           this.targetCameraX = 0;
           this.state = 'DRAGGING';
