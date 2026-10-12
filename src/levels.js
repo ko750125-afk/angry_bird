@@ -531,6 +531,254 @@
         pig(890, 470, 20, 'normal'),
         pig(890, GROUND_Y, 22, 'normal')
       ]
+    },
+
+    // =========================================================================
+    // STAGE 7 : 🌲 신비의 고대 버섯 숲 (Mystic Mushroom Forest)
+    // 기믹: [신규] 2단 가속 스프링 점프대 & 상공 부유 풍선 돼지 & 버섯 거목 요새
+    // =========================================================================
+    {
+      id: 7,
+      theme: 'forest',
+      skyTheme: 'forest',
+      title: 'STAGE 7 : 🌲 신비의 고대 버섯 숲',
+      subtitle: '새총 앞 2단 스프링으로 높이 솟구쳐, 공중 부유 풍선 돼지와 거목 위의 황금알을 공략하세요!',
+      badge: '고대 숲 / 2단 스프링 & 비행 돼지',
+      gravityY: 1.0,
+      birds: ['red', 'yellow', 'blue', 'white'],
+      threeStarScore: 48000,
+      twoStarScore: 32000,
+      blocks: [
+        // 🌟 신규 기믹: 2단 연속 스프링 점프대!
+        spring(520, GROUND_Y, 78, 24),
+        spring(710, GROUND_Y, 78, 24),
+
+        // 거목 1층 밑동 (높이 120)
+        box(840, GROUND_Y, 24, 120, 'wood'),
+        crystal(940, GROUND_Y, 24, 120),
+        box(1040, GROUND_Y, 24, 120, 'wood'),
+
+        // 1층 중앙 화약고 TNT
+        box(940, GROUND_Y, 44, 44, 'tnt'),
+
+        // 1층 천장 판자
+        box(890, 460, 130, 20, 'wood'),
+        box(990, 460, 130, 20, 'wood'),
+
+        // 2층 버섯 기둥 (높이 95)
+        box(880, 440, 20, 95, 'wood'),
+        box(1000, 440, 20, 95, 'wood'),
+
+        // 2층 지붕 얼음 슬래브
+        box(940, 365, 160, 22, 'ice'),
+
+        // 3층 크리스탈 버섯 갓 & 롤링 바위
+        crystal(940, 343, 90, 24),
+        boulder(940, 319, 26),
+
+        // 🌟 상공의 전설의 황금알
+        goldenEgg(940, 240)
+      ],
+      pigs: [
+        // 상공 비행 풍선 돼지 2마리
+        pig(620, 240, 22, 'balloon_pig'),
+        pig(800, 180, 22, 'balloon_pig'),
+        pig(890, GROUND_Y, 23, 'helmet'),
+        pig(990, GROUND_Y, 21, 'normal'),
+        pig(940, 440, 22, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 8 : 🏴‍☠️ 카리브 해적 요새 (Pirate Cove)
+    // 기믹: [신규] 롤링 대포알 바위 2연발 & 화약고 연쇄 폭발 & 해적 골렘 보스
+    // =========================================================================
+    {
+      id: 8,
+      theme: 'pirate',
+      skyTheme: 'pirate',
+      title: 'STAGE 8 : 🏴‍☠️ 카리브 해적 요새',
+      subtitle: '해적선 망루 지지대를 무너뜨려 굴러떨어지는 거대 대포알로 요새를 수장시키세요!',
+      badge: '해적 요새 / 롤링 대포알 & 해적 골렘',
+      gravityY: 1.0,
+      birds: ['yellow', 'black', 'black', 'big'],
+      threeStarScore: 52000,
+      twoStarScore: 35000,
+      blocks: [
+        // 전방 망루 (Static)
+        box(690, GROUND_Y, 80, 170, 'stone', true),
+        box(690, 410, 110, 22, 'stone', true),
+
+        // 망루 위 대포알 바위 굴리기 장치
+        box(730, 388, 16, 50, 'wood'),
+        boulder(690, 388, 30),
+
+        // 해적 요새 본관 1층 (높이 130)
+        steel(830, GROUND_Y, 26, 130),
+        box(930, GROUND_Y, 24, 130, 'wood'),
+        box(1030, GROUND_Y, 24, 130, 'wood'),
+        steel(1130, GROUND_Y, 26, 130),
+
+        // 해적 화약고 TNT 3연속
+        box(880, GROUND_Y, 44, 44, 'tnt'),
+        box(980, GROUND_Y, 44, 44, 'tnt'),
+        box(1080, GROUND_Y, 44, 44, 'tnt'),
+
+        // 1층 상판
+        box(880, 450, 130, 22, 'wood'),
+        box(980, 450, 130, 22, 'wood'),
+        box(1080, 450, 130, 22, 'wood'),
+
+        // 2층 해적 선장실
+        steel(910, 428, 24, 100),
+        steel(1050, 428, 24, 100),
+        box(980, 328, 170, 22, 'stone'),
+
+        // 2층 지붕 위 2번째 롤링 바위
+        boulder(980, 306, 26),
+
+        // 황금알 보물
+        goldenEgg(980, 250)
+      ],
+      pigs: [
+        pig(690, 410, 20, 'normal'),
+        pig(980, 428, 32, 'golem'), // 해적 선장 골렘
+        pig(880, 428, 23, 'helmet'),
+        pig(1080, 428, 23, 'helmet'),
+        pig(980, GROUND_Y, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 9 : ⚡ 사이버 네온 메트로폴리스 (Cyberpunk Neon City)
+    // 기믹: [신규] 네온 워프 포털 게이트 & 사이버 마법사 돼지 & 초고층 마천루
+    // =========================================================================
+    {
+      id: 9,
+      theme: 'neon',
+      skyTheme: 'neon',
+      title: 'STAGE 9 : ⚡ 사이버 네온 메트로폴리스',
+      subtitle: '네온 포털 게이트로 요새 내부를 기습하여 사이버 마법사 돼지와 방탄 요새를 분쇄하세요!',
+      badge: '네온 시티 / 워프 포털 저격 & 마법사',
+      gravityY: 1.0,
+      birds: ['blue', 'yellow', 'white', 'big', 'black'],
+      threeStarScore: 58000,
+      twoStarScore: 40000,
+      blocks: [
+        // 🌟 네온 워프 포털 쌍
+        portal(500, 380, 28, 95, 'portal_in', 'p_out'),
+        portal(1060, 220, 28, 95, 'portal_out', 'p_in'),
+
+        // 가속 스프링
+        spring(600, GROUND_Y, 78, 24),
+
+        // 타워 1 (X: 740 ~ 880)
+        steel(760, GROUND_Y, 26, 140),
+        crystal(860, GROUND_Y, 26, 140),
+        box(810, GROUND_Y, 44, 44, 'tnt'),
+        box(810, 440, 130, 22, 'steel'),
+        crystal(810, 418, 24, 110),
+        box(810, 308, 110, 20, 'crystal'),
+
+        // 타워 2 (X: 920 ~ 1160)
+        steel(950, GROUND_Y, 28, 140),
+        steel(1070, GROUND_Y, 28, 140),
+        box(1150, GROUND_Y, 26, 140, 'stone'),
+        box(1010, 440, 140, 22, 'steel'),
+        box(1110, 440, 140, 22, 'stone'),
+
+        // 2층 서버룸
+        crystal(970, 418, 24, 110),
+        steel(1090, 418, 24, 110),
+        box(1030, 308, 150, 22, 'steel'),
+
+        // 3층 사령탑
+        crystal(1030, 286, 22, 90),
+        box(1030, 196, 110, 20, 'ice'),
+
+        // 옥상 황금알
+        goldenEgg(1030, 150)
+      ],
+      pigs: [
+        pig(810, 308, 23, 'astronaut'),
+        pig(1030, 418, 24, 'wizard'), // 사이버 마법사
+        pig(1010, GROUND_Y, 23, 'helmet'),
+        pig(1110, GROUND_Y, 23, 'helmet'),
+        pig(1030, 196, 21, 'normal'),
+        pig(810, 440, 21, 'normal')
+      ]
+    },
+
+    // =========================================================================
+    // STAGE 10 : 🏰 최후의 결전: 천공의 킹피그 공중 요새 (Final Sky Citadel)
+    // 기믹: [대단원] 6종 정예 버드 총출동 & 킹피그+골렘+마법사+비행돼지 보스 총집결!
+    // =========================================================================
+    {
+      id: 10,
+      theme: 'citadel',
+      skyTheme: 'citadel',
+      title: 'STAGE 10 : 🏰 최후의 결전: 킹피그 공중 요새',
+      subtitle: '대망의 최종 스테이지! 6종 정예 버드 총출동! 킹피그, 골렘, 마법사가 이끄는 최후의 공중 요새를 함락시키세요!',
+      badge: '최종 결전 / 전설의 버드 총출동 & 보스 연합',
+      gravityY: 0.9,
+      birds: ['red', 'yellow', 'blue', 'black', 'white', 'big'],
+      threeStarScore: 72000,
+      twoStarScore: 50000,
+      blocks: [
+        // 공성 스프링 & 워프 포털
+        spring(550, GROUND_Y, 86, 24),
+        portal(650, 340, 28, 95, 'portal_in', 'p_out'),
+        portal(980, 150, 28, 95, 'portal_out', 'p_in'),
+
+        // 1층 방호벽 (X: 760 ~ 1180)
+        steel(760, GROUND_Y, 28, 140),
+        box(870, GROUND_Y, 28, 140, 'stone'),
+        steel(980, GROUND_Y, 28, 140),
+        box(1090, GROUND_Y, 28, 140, 'stone'),
+        steel(1180, GROUND_Y, 28, 140),
+
+        // 1층 무기고 TNT 4연발
+        box(815, GROUND_Y, 44, 44, 'tnt'),
+        box(925, GROUND_Y, 44, 44, 'tnt'),
+        box(1035, GROUND_Y, 44, 44, 'tnt'),
+        box(1135, GROUND_Y, 44, 44, 'tnt'),
+
+        // 1층 천장 슬래브
+        box(815, 440, 135, 22, 'stone'),
+        box(925, 440, 135, 22, 'steel'),
+        box(1035, 440, 135, 22, 'stone'),
+        box(1135, 440, 135, 22, 'steel'),
+
+        // 2층 요새 기둥 & 대형 TNT
+        steel(820, 418, 26, 120),
+        crystal(925, 418, 26, 120),
+        box(980, 418, 48, 48, 'tnt'),
+        crystal(1035, 418, 26, 120),
+        steel(1140, 418, 26, 120),
+
+        // 2층 천장
+        box(870, 298, 130, 22, 'stone'),
+        box(980, 298, 150, 24, 'stone'),
+        box(1090, 298, 130, 22, 'stone'),
+
+        // 3층 킹피그 왕좌 & 신전
+        crystal(930, 274, 22, 95),
+        crystal(1030, 274, 22, 95),
+        box(980, 179, 140, 22, 'stone'),
+
+        // 왕좌 위 롤링 바위 & 황금알
+        boulder(980, 157, 28),
+        goldenEgg(980, 95)
+      ],
+      pigs: [
+        pig(680, 190, 22, 'balloon_pig'), // 공중 정찰대
+        pig(925, GROUND_Y, 32, 'golem'), // 1층 요새 수문장 골렘
+        pig(870, 418, 23, 'wizard'), // 2층 마법사
+        pig(1090, 418, 24, 'helmet'), // 2층 헬멧
+        pig(980, 274, 36, 'king'), // 👑 3층 최종 보스 킹피그!
+        pig(815, GROUND_Y, 22, 'helmet'),
+        pig(1135, GROUND_Y, 22, 'helmet')
+      ]
     }
   ];
 })();

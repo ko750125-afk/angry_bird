@@ -1,9 +1,9 @@
-const CACHE_NAME = 'angry-birds-pwa-v14';
+const CACHE_NAME = 'angry-birds-pwa-v15';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/manifest.json?v=10',
+  '/manifest.json?v=15',
   '/public/icons/icon.svg',
   '/public/icons/icon-192.png',
   '/public/icons/icon-192.png?v=10',

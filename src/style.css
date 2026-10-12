@@ -270,11 +270,21 @@ html, body {
 }
 
 /* 스테이지 선택 그리드 */
+#stageModal .modal-box {
+  max-width: 720px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .stage-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  gap: 12px;
-  margin: 18px 0 22px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 16px 0 20px;
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 4px;
 }
 
 .stage-card {

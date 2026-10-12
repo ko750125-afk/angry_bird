@@ -1469,8 +1469,32 @@ class AngryBirdsGame {
       grad.addColorStop(0.45, '#111827');
       grad.addColorStop(0.8, '#1e1b4b');
       grad.addColorStop(1, '#3b0764');
+    } else if (theme === 'forest') {
+      // 6. 신비의 고대 버섯 숲: 딥 에메랄드 & 세이지 그린
+      grad.addColorStop(0, '#022c22');
+      grad.addColorStop(0.4, '#064e3b');
+      grad.addColorStop(0.75, '#047857');
+      grad.addColorStop(1, '#6ee7b7');
+    } else if (theme === 'pirate') {
+      // 7. 카리브 해적 요새: 석양의 자줏빛 바다 & 코랄 레드
+      grad.addColorStop(0, '#4c0519');
+      grad.addColorStop(0.4, '#881337');
+      grad.addColorStop(0.75, '#e11d48');
+      grad.addColorStop(1, '#fbcfe8');
+    } else if (theme === 'neon') {
+      // 8. 사이버 네온 메트로폴리스: 다크 나이트 & 네온 바이올렛
+      grad.addColorStop(0, '#030712');
+      grad.addColorStop(0.4, '#1e1b4b');
+      grad.addColorStop(0.75, '#581c87');
+      grad.addColorStop(1, '#06b6d4');
+    } else if (theme === 'citadel') {
+      // 9. 천공의 킹피그 공중 요새: 영광의 황금빛 새벽 & 로열 블루
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(0.35, '#1e1b4b');
+      grad.addColorStop(0.7, '#b45309');
+      grad.addColorStop(1, '#fef08a');
     } else {
-      // 6. 에메랄드 초원: 화창한 주간 푸른 하늘
+      // 10. 에메랄드 초원: 화창한 주간 푸른 하늘
       grad.addColorStop(0, '#0284c7');
       grad.addColorStop(0.65, '#38bdf8');
       grad.addColorStop(1, '#bae6fd');
@@ -1632,6 +1656,84 @@ class AngryBirdsGame {
       ctx.arc(1140, GROUND_Y + 40, 260, Math.PI, 0);
       ctx.fill();
 
+    } else if (theme === 'forest') {
+      // 고대 거목 및 버섯 실루엣
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.arc(300, GROUND_Y + 30, 260, Math.PI, 0);
+      ctx.arc(750, GROUND_Y + 50, 310, Math.PI, 0);
+      ctx.arc(1150, GROUND_Y + 20, 270, Math.PI, 0);
+      ctx.fill();
+
+      // 거대 야광 버섯 갓 실루엣
+      ctx.fillStyle = '#047857';
+      [220, 600, 980].forEach((bx) => {
+        ctx.fillRect(bx - 6, GROUND_Y - 50, 12, 50);
+        ctx.beginPath();
+        ctx.ellipse(bx, GROUND_Y - 50, 36, 20, 0, Math.PI, 0);
+        ctx.fill();
+      });
+
+    } else if (theme === 'pirate') {
+      // 해적선 돛대 및 바다 암초 실루엣
+      ctx.fillStyle = '#4c0519';
+      ctx.beginPath();
+      ctx.moveTo(-100, GROUND_Y);
+      ctx.lineTo(150, 340);
+      ctx.lineTo(260, 380);
+      ctx.lineTo(480, 330);
+      ctx.lineTo(600, 390);
+      ctx.lineTo(840, 320);
+      ctx.lineTo(1020, 370);
+      ctx.lineTo(1240, 310);
+      ctx.lineTo(1380, 360);
+      ctx.lineTo(1380, GROUND_Y);
+      ctx.closePath();
+      ctx.fill();
+
+      // 돛대 실루엣
+      ctx.fillStyle = '#881337';
+      [240, 780].forEach((mx) => {
+        ctx.fillRect(mx, GROUND_Y - 80, 6, 80);
+        ctx.fillRect(mx - 24, GROUND_Y - 60, 54, 4);
+      });
+
+    } else if (theme === 'neon') {
+      // 네온 마천루 그리드 실루엣
+      ctx.fillStyle = '#0f172a';
+      [120, 280, 460, 680, 860, 1040, 1200].forEach((nx, i) => {
+        const nh = 140 + (i % 4) * 60;
+        ctx.fillRect(nx - 45, GROUND_Y - nh, 90, nh);
+      });
+      // 네온 전선 라인
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 320);
+      ctx.bezierCurveTo(400, 380, 800, 300, WORLD_W, 360);
+      ctx.stroke();
+
+    } else if (theme === 'citadel') {
+      // 천공의 구름 바다 & 황금빛 탑 실루엣
+      ctx.fillStyle = '#1e1b4b';
+      ctx.beginPath();
+      ctx.arc(240, GROUND_Y + 50, 240, Math.PI, 0);
+      ctx.arc(680, GROUND_Y + 70, 300, Math.PI, 0);
+      ctx.arc(1100, GROUND_Y + 40, 260, Math.PI, 0);
+      ctx.fill();
+
+      // 천공의 첨탑 실루엣
+      ctx.fillStyle = '#b45309';
+      [420, 880].forEach((tx) => {
+        ctx.fillRect(tx - 10, GROUND_Y - 90, 20, 90);
+        ctx.beginPath();
+        ctx.moveTo(tx - 18, GROUND_Y - 90);
+        ctx.lineTo(tx, GROUND_Y - 140);
+        ctx.lineTo(tx + 18, GROUND_Y - 90);
+        ctx.closePath();
+        ctx.fill();
+      });
+
     } else {
       // 둥실둥실 구름
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
@@ -1718,6 +1820,45 @@ class AngryBirdsGame {
       ctx.fillStyle = '#334155';
       ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'forest') {
+      // 숲: 이끼 낀 짙은 녹음 지층 + 에메랄드 잔디
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#059669';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+      // 야광 버섯 발광 도트
+      ctx.fillStyle = '#6ee7b7';
+      for (let fx = -200; fx < WORLD_W + 400; fx += 110) {
+        ctx.beginPath();
+        ctx.arc(fx, GROUND_Y + 8, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (theme === 'pirate') {
+      // 해적: 황금빛 백사장 모래 & 해변 암반
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'neon') {
+      // 사이버: 미래형 아스팔트 & 네온 시안 라인
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#ec4899';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'citadel') {
+      // 천공 요새: 고귀한 네이비 대리석 & 황금빛 룬 문양
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#facc15';
       ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else {
       // 초원: 싱그러운 녹색 잔디 + 흙 지면 + 야생화 꽃밭
@@ -2550,8 +2691,8 @@ class AngryBirdsGame {
       this.weatherParticles.push({
         x: Math.random() * WORLD_W,
         y: Math.random() * GROUND_Y,
-        vx: theme === 'desert' ? (2.2 + Math.random() * 2.5) : (Math.random() - 0.5) * 1.5,
-        vy: theme === 'glacier' ? (0.8 + Math.random() * 1.4) : (theme === 'volcano' ? (-0.9 - Math.random() * 1.6) : (Math.random() - 0.5) * 0.8),
+        vx: theme === 'desert' || theme === 'pirate' ? (2.2 + Math.random() * 2.5) : (theme === 'neon' ? (Math.random() - 0.5) * 3 : (Math.random() - 0.5) * 1.5),
+        vy: theme === 'glacier' ? (0.8 + Math.random() * 1.4) : (theme === 'volcano' ? (-0.9 - Math.random() * 1.6) : (theme === 'citadel' ? (0.4 + Math.random() * 0.8) : (Math.random() - 0.5) * 0.8)),
         size: Math.random() * 3.5 + 1.5,
         color:
           theme === 'glacier' ? '#ffffff' :
@@ -2559,6 +2700,10 @@ class AngryBirdsGame {
           theme === 'desert' ? '#fed7aa' :
           theme === 'royal' ? '#fde047' :
           theme === 'space' ? (Math.random() > 0.5 ? '#a5f3fc' : '#e879f9') :
+          theme === 'forest' ? (Math.random() > 0.5 ? '#6ee7b7' : '#a7f3d0') :
+          theme === 'pirate' ? (Math.random() > 0.5 ? '#fbbf24' : '#f43f5e') :
+          theme === 'neon' ? (Math.random() > 0.5 ? '#22d3ee' : '#f472b6') :
+          theme === 'citadel' ? (Math.random() > 0.5 ? '#fde047' : '#ffffff') :
           '#bbf7d0',
         alpha: Math.random() * 0.7 + 0.3,
         phase: Math.random() * Math.PI * 2
