@@ -899,7 +899,19 @@ class SoundEngine {
       }
     };
 
-    const cfg = THEMES[this.currentTheme] || THEMES.plains;
+    const themeAliases = {
+      steampunk: 'desert',
+      mine: 'desert',
+      ruins: 'desert',
+      retro: 'neon',
+      carnival: 'neon',
+      cyber: 'neon',
+      islands: 'plains',
+      fortress: 'volcano',
+      singularity: 'space'
+    };
+    const resolvedTheme = this.currentTheme in THEMES ? this.currentTheme : (themeAliases[this.currentTheme] || 'plains');
+    const cfg = THEMES[resolvedTheme] || THEMES.plains;
 
     this.bgmTimer = setInterval(() => {
       if (!this.bgmEnabled || !this.ctx || this.ctx.state !== 'running') return;

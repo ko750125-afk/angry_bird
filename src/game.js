@@ -1493,6 +1493,60 @@ class AngryBirdsGame {
       grad.addColorStop(0.35, '#1e1b4b');
       grad.addColorStop(0.7, '#b45309');
       grad.addColorStop(1, '#fef08a');
+    } else if (theme === 'steampunk') {
+      // 11. 스팀펑크 시소: 앤틱 브라운 & 황동 골드
+      grad.addColorStop(0, '#451a03');
+      grad.addColorStop(0.4, '#78350f');
+      grad.addColorStop(0.75, '#b45309');
+      grad.addColorStop(1, '#fde047');
+    } else if (theme === 'retro') {
+      // 12. 레트로 슬로프: 80s 신스웨이브 퍼플 & 코랄
+      grad.addColorStop(0, '#3b0764');
+      grad.addColorStop(0.4, '#701a75');
+      grad.addColorStop(0.75, '#c026d3');
+      grad.addColorStop(1, '#f43f5e');
+    } else if (theme === 'ruins') {
+      // 14. 고대 젠가 유적: 사암 골드 & 테라코타
+      grad.addColorStop(0, '#78350f');
+      grad.addColorStop(0.45, '#a16207');
+      grad.addColorStop(0.8, '#ca8a04');
+      grad.addColorStop(1, '#fef08a');
+    } else if (theme === 'islands') {
+      // 15. 열대 군도: 남태평양 딥블루 & 청록 에메랄드
+      grad.addColorStop(0, '#082f49');
+      grad.addColorStop(0.45, '#0284c7');
+      grad.addColorStop(0.8, '#38bdf8');
+      grad.addColorStop(1, '#bae6fd');
+    } else if (theme === 'mine') {
+      // 16. 지하 광산: 딥 차콜 & 앰버 횃불
+      grad.addColorStop(0, '#18181b');
+      grad.addColorStop(0.4, '#27272a');
+      grad.addColorStop(0.75, '#3f3f46');
+      grad.addColorStop(1, '#d97706');
+    } else if (theme === 'carnival') {
+      // 17. 서커스 매직: 페스티벌 마젠타 & 바이올렛
+      grad.addColorStop(0, '#2e1065');
+      grad.addColorStop(0.4, '#581c87');
+      grad.addColorStop(0.75, '#9333ea');
+      grad.addColorStop(1, '#f472b6');
+    } else if (theme === 'cyber') {
+      // 18. 사이버 헬릭스: 네온 시안 & 딥 나이트
+      grad.addColorStop(0, '#030712');
+      grad.addColorStop(0.4, '#1e1b4b');
+      grad.addColorStop(0.75, '#0284c7');
+      grad.addColorStop(1, '#06b6d4');
+    } else if (theme === 'fortress') {
+      // 19. 철갑 거북 요새: 중장갑 슬레이트 & 스틸 메탈
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(0.4, '#1e1b4b');
+      grad.addColorStop(0.75, '#334155');
+      grad.addColorStop(1, '#64748b');
+    } else if (theme === 'singularity') {
+      // 20. 싱귤래리티 최종 결전: 웜홀 딥 스페이스 & 골든 오라
+      grad.addColorStop(0, '#000000');
+      grad.addColorStop(0.35, '#1e1b4b');
+      grad.addColorStop(0.7, '#4c0519');
+      grad.addColorStop(1, '#f59e0b');
     } else {
       // 10. 에메랄드 초원: 화창한 주간 푸른 하늘
       grad.addColorStop(0, '#0284c7');
@@ -1859,6 +1913,54 @@ class AngryBirdsGame {
       ctx.fillStyle = '#f8fafc';
       ctx.fillRect(-400, GROUND_Y, groundW, 18);
       ctx.fillStyle = '#facc15';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'steampunk' || theme === 'mine') {
+      // 스팀펑크/광산: 황동 금속판과 구리 리벳
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'retro' || theme === 'carnival') {
+      // 레트로/서커스: 신스웨이브 네온 퍼플
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#c026d3';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'ruins') {
+      // 고대 유적: 풍화된 사암과 황금 모래
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#ca8a04';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'islands') {
+      // 열대 군도: 산호초 에메랄드 해변
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'cyber' || theme === 'fortress') {
+      // 사이버/철갑 요새: 고강도 강철 장갑판
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
+    } else if (theme === 'singularity') {
+      // 싱귤래리티: 웜홀 코스믹 매트릭스
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(-400, GROUND_Y, groundW, groundDepth);
+      ctx.fillStyle = '#4c0519';
+      ctx.fillRect(-400, GROUND_Y, groundW, 18);
+      ctx.fillStyle = '#f59e0b';
       ctx.fillRect(-400, GROUND_Y + 18, groundW, 6);
     } else {
       // 초원: 싱그러운 녹색 잔디 + 흙 지면 + 야생화 꽃밭
@@ -2704,6 +2806,15 @@ class AngryBirdsGame {
           theme === 'pirate' ? (Math.random() > 0.5 ? '#fbbf24' : '#f43f5e') :
           theme === 'neon' ? (Math.random() > 0.5 ? '#22d3ee' : '#f472b6') :
           theme === 'citadel' ? (Math.random() > 0.5 ? '#fde047' : '#ffffff') :
+          theme === 'steampunk' ? (Math.random() > 0.5 ? '#f59e0b' : '#d97706') :
+          theme === 'retro' ? (Math.random() > 0.5 ? '#f43f5e' : '#c026d3') :
+          theme === 'ruins' ? (Math.random() > 0.5 ? '#ca8a04' : '#fde047') :
+          theme === 'islands' ? (Math.random() > 0.5 ? '#38bdf8' : '#4ade80') :
+          theme === 'mine' ? (Math.random() > 0.5 ? '#fbbf24' : '#f59e0b') :
+          theme === 'carnival' ? (Math.random() > 0.5 ? '#ec4899' : '#facc15') :
+          theme === 'cyber' ? (Math.random() > 0.5 ? '#06b6d4' : '#3b82f6') :
+          theme === 'fortress' ? (Math.random() > 0.5 ? '#94a3b8' : '#f97316') :
+          theme === 'singularity' ? (Math.random() > 0.5 ? '#f59e0b' : '#c026d3') :
           '#bbf7d0',
         alpha: Math.random() * 0.7 + 0.3,
         phase: Math.random() * Math.PI * 2
