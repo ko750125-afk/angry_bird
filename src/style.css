@@ -336,6 +336,19 @@ html, body {
   color: #4ade80;
 }
 
+.stage-badge-tag {
+  display: inline-block;
+  margin: 4px 0 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.70rem;
+  font-weight: 800;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #7dd3fc;
+  letter-spacing: -0.2px;
+}
+
 @media (max-width: 900px) {
   .hud-subtitle {
     display: none;

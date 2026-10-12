@@ -12,9 +12,22 @@ class SoundEngine {
     this.bgmPlaying = false;
     this.bgmTimer = null;
     this.bgmStep = 0;
+    this.currentTheme = 'plains';
     this.lastStretchTime = 0;
     this.lastImpactTime = 0;
     this.noiseBuffer = null;
+  }
+
+  /**
+   * 스테이지 테마(BGM 분위기) 전환
+   */
+  setTheme(theme = 'plains') {
+    if (this.currentTheme === theme) return;
+    this.currentTheme = theme;
+    if (this.bgmPlaying) {
+      this.stopBgm();
+      this.startBgm();
+    }
   }
 
   /**
@@ -241,6 +254,32 @@ class SoundEngine {
       });
     } else if (birdType === 'black') {
       this.playExplosion();
+    } else if (birdType === 'white') {
+      // 마틸다 알 투하 뿅 & 추진음!
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.18);
+      gain.gain.setValueAtTime(0.32, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } else if (birdType === 'big') {
+      // 테렌스 거대 그라운드 파운드 지진음!
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(28, now + 0.48);
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
     } else {
       // 레드 쇼크웨이브 파동음
       const osc = this.ctx.createOscillator();
@@ -339,6 +378,21 @@ class SoundEngine {
         osc.start(now + i * 0.02);
         osc.stop(now + 0.17 + i * 0.03);
       });
+    } else if (material === 'boulder') {
+      // 굴러가는 바위 묵직한 지진 굉음
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(68, now);
+      osc.frequency.exponentialRampToValueAtTime(24, now + 0.32);
+
+      gain.gain.setValueAtTime(vol * 1.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.34);
     } else if (material === 'stone') {
       // 돌 묵직한 타격음
       const osc = this.ctx.createOscillator();
@@ -523,7 +577,7 @@ class SoundEngine {
   }
 
   /**
-   * 경쾌한 앵그리버드 스타일 아케이드 배경음악(BGM) 루프 시작
+   * 6개 테마별 배경음악(BGM) 루프 신디사이저
    */
   startBgm() {
     if (!this.bgmEnabled || this.bgmPlaying) return;
@@ -531,45 +585,132 @@ class SoundEngine {
     if (!this.ctx) return;
 
     this.bgmPlaying = true;
-    // 익살스럽고 경쾌한 단조/장조 아케이드 행진곡 멜로디 (Hz)
-    const melody = [
-      329.63, 349.23, 392.00, 523.25, 0, 392.00, 523.25, 0,
-      440.00, 392.00, 349.23, 329.63, 293.66, 329.63, 261.63, 0,
-      329.63, 349.23, 392.00, 523.25, 587.33, 523.25, 493.88, 392.00,
-      440.00, 392.00, 349.23, 293.66, 261.63, 0, 261.63, 0
-    ];
-    const bass = [
-      130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0,
-      146.83, 0, 196.00, 0, 130.81, 0, 130.81, 0,
-      130.81, 0, 196.00, 0, 174.61, 0, 196.00, 0,
-      146.83, 0, 196.00, 0, 130.81, 196.00, 130.81, 0
-    ];
+    this.bgmStep = 0;
 
-    const stepDurationMs = 210;
+    const THEMES = {
+      plains: {
+        stepMs: 205,
+        mWave: 'triangle',
+        melody: [
+          329.63, 349.23, 392.00, 523.25, 0, 392.00, 523.25, 0,
+          440.00, 392.00, 349.23, 329.63, 293.66, 329.63, 261.63, 0,
+          329.63, 349.23, 392.00, 523.25, 587.33, 523.25, 493.88, 392.00,
+          440.00, 392.00, 349.23, 293.66, 261.63, 0, 261.63, 0
+        ],
+        bass: [
+          130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0,
+          146.83, 0, 196.00, 0, 130.81, 0, 130.81, 0,
+          130.81, 0, 196.00, 0, 174.61, 0, 196.00, 0,
+          146.83, 0, 196.00, 0, 130.81, 196.00, 130.81, 0
+        ]
+      },
+      desert: {
+        stepMs: 180,
+        mWave: 'sawtooth',
+        melody: [
+          293.66, 349.23, 392.00, 440.00, 523.25, 440.00, 392.00, 0,
+          587.33, 0, 523.25, 440.00, 392.00, 440.00, 349.23, 293.66,
+          293.66, 349.23, 392.00, 440.00, 587.33, 523.25, 440.00, 0,
+          440.00, 392.00, 349.23, 293.66, 261.63, 293.66, 293.66, 0
+        ],
+        bass: [
+          146.83, 146.83, 0, 146.83, 196.00, 0, 146.83, 0,
+          146.83, 146.83, 0, 146.83, 220.00, 0, 146.83, 0,
+          146.83, 146.83, 0, 146.83, 196.00, 0, 146.83, 0,
+          174.61, 0, 164.81, 0, 146.83, 0, 146.83, 0
+        ]
+      },
+      glacier: {
+        stepMs: 230,
+        mWave: 'sine',
+        melody: [
+          523.25, 659.25, 783.99, 1046.5, 987.77, 783.99, 659.25, 0,
+          587.33, 698.46, 880.00, 1174.66, 1046.5, 880.00, 698.46, 0,
+          659.25, 783.99, 1046.5, 1318.51, 1174.66, 1046.5, 783.99, 0,
+          523.25, 659.25, 783.99, 659.25, 523.25, 0, 523.25, 0
+        ],
+        bass: [
+          130.81, 0, 261.63, 0, 164.81, 0, 261.63, 0,
+          146.83, 0, 293.66, 0, 174.61, 0, 293.66, 0,
+          164.81, 0, 329.63, 0, 196.00, 0, 329.63, 0,
+          130.81, 0, 196.00, 0, 261.63, 0, 130.81, 0
+        ]
+      },
+      volcano: {
+        stepMs: 165,
+        mWave: 'sawtooth',
+        melody: [
+          220.00, 220.00, 261.63, 293.66, 329.63, 293.66, 261.63, 0,
+          349.23, 329.63, 293.66, 261.63, 246.94, 261.63, 220.00, 0,
+          220.00, 220.00, 261.63, 329.63, 440.00, 392.00, 349.23, 0,
+          329.63, 293.66, 261.63, 246.94, 220.00, 0, 220.00, 0
+        ],
+        bass: [
+          110.00, 110.00, 164.81, 110.00, 130.81, 110.00, 146.83, 110.00,
+          110.00, 110.00, 164.81, 110.00, 123.47, 110.00, 110.00, 0,
+          110.00, 110.00, 164.81, 110.00, 130.81, 110.00, 146.83, 110.00,
+          164.81, 0, 146.83, 0, 130.81, 0, 110.00, 0
+        ]
+      },
+      royal: {
+        stepMs: 200,
+        mWave: 'triangle',
+        melody: [
+          392.00, 523.25, 659.25, 783.99, 0, 659.25, 783.99, 0,
+          880.00, 783.99, 659.25, 523.25, 587.33, 659.25, 523.25, 0,
+          659.25, 783.99, 880.00, 1046.5, 987.77, 783.99, 880.00, 0,
+          783.99, 659.25, 587.33, 523.25, 523.25, 0, 523.25, 0
+        ],
+        bass: [
+          130.81, 196.00, 130.81, 196.00, 164.81, 196.00, 130.81, 196.00,
+          174.61, 220.00, 174.61, 220.00, 146.83, 196.00, 130.81, 196.00,
+          164.81, 196.00, 164.81, 196.00, 174.61, 220.00, 174.61, 220.00,
+          196.00, 0, 146.83, 0, 130.81, 196.00, 130.81, 0
+        ]
+      },
+      space: {
+        stepMs: 260,
+        mWave: 'sine',
+        melody: [
+          293.66, 440.00, 587.33, 880.00, 659.25, 587.33, 440.00, 0,
+          329.63, 493.88, 659.25, 987.77, 783.99, 659.25, 493.88, 0,
+          349.23, 523.25, 698.46, 1046.5, 880.00, 698.46, 523.25, 0,
+          392.00, 587.33, 783.99, 1174.66, 880.00, 698.46, 587.33, 0
+        ],
+        bass: [
+          73.42, 0, 146.83, 0, 110.00, 0, 146.83, 0,
+          82.41, 0, 164.81, 0, 123.47, 0, 164.81, 0,
+          87.31, 0, 174.61, 0, 130.81, 0, 174.61, 0,
+          98.00, 0, 196.00, 0, 146.83, 0, 73.42, 0
+        ]
+      }
+    };
+
+    const cfg = THEMES[this.currentTheme] || THEMES.plains;
 
     this.bgmTimer = setInterval(() => {
       if (!this.bgmEnabled || !this.ctx || this.ctx.state !== 'running') return;
 
-      const idx = this.bgmStep % melody.length;
+      const idx = this.bgmStep % cfg.melody.length;
       const now = this.ctx.currentTime;
 
-      const mFreq = melody[idx];
+      const mFreq = cfg.melody[idx];
       if (mFreq > 0) {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'triangle';
+        osc.type = cfg.mWave || 'triangle';
         osc.frequency.setValueAtTime(mFreq, now);
 
-        gain.gain.setValueAtTime(0.055, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        gain.gain.setValueAtTime(0.052, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (cfg.stepMs / 1000) * 0.85);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.19);
+        osc.stop(now + (cfg.stepMs / 1000) * 0.9);
       }
 
-      const bFreq = bass[idx];
+      const bFreq = cfg.bass[idx];
       if (bFreq > 0) {
         const bOsc = this.ctx.createOscillator();
         const bGain = this.ctx.createGain();
@@ -577,16 +718,16 @@ class SoundEngine {
         bOsc.frequency.setValueAtTime(bFreq, now);
 
         bGain.gain.setValueAtTime(0.065, now);
-        bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+        bGain.gain.exponentialRampToValueAtTime(0.001, now + (cfg.stepMs / 1000) * 0.9);
 
         bOsc.connect(bGain);
         bGain.connect(this.ctx.destination);
         bOsc.start(now);
-        bOsc.stop(now + 0.2);
+        bOsc.stop(now + (cfg.stepMs / 1000) * 0.95);
       }
 
       this.bgmStep++;
-    }, stepDurationMs);
+    }, cfg.stepMs);
   }
 
   stopBgm() {
