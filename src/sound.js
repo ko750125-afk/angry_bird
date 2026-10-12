@@ -7,6 +7,7 @@
 class SoundEngine {
   constructor() {
     this.ctx = null;
+    this.userInteracted = false;
     this.sfxEnabled = true;
     this.bgmEnabled = true;
     this.bgmPlaying = false;
@@ -16,6 +17,20 @@ class SoundEngine {
     this.lastStretchTime = 0;
     this.lastImpactTime = 0;
     this.noiseBuffer = null;
+
+    const onUserAction = () => {
+      this.userInteracted = true;
+      this.unlock();
+      if (this.bgmEnabled && !this.bgmPlaying) {
+        this.startBgm();
+      }
+      window.removeEventListener('pointerdown', onUserAction);
+      window.removeEventListener('keydown', onUserAction);
+      window.removeEventListener('touchstart', onUserAction);
+    };
+    window.addEventListener('pointerdown', onUserAction, { once: true });
+    window.addEventListener('keydown', onUserAction, { once: true });
+    window.addEventListener('touchstart', onUserAction, { once: true });
   }
 
   /**
@@ -31,9 +46,10 @@ class SoundEngine {
   }
 
   /**
-   * 사용자 최초 인터랙션 시 AudioContext 활성화
+   * 사용자 최초 인터랙션(클릭, 터치 등) 시에만 AudioContext 활성화
    */
   unlock() {
+    if (!this.userInteracted) return;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
@@ -41,7 +57,7 @@ class SoundEngine {
       this._createNoiseBuffer();
     }
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 

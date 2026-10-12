@@ -207,7 +207,7 @@ class AngryBirdsGame {
     this._renderStageSelectModal();
     this.loadLevel(0);
 
-    this.lastFrameTime = performance.now();
+    this.lastFrameTime = 0;
     requestAnimationFrame((t) => this._loop(t));
   }
 
@@ -2579,8 +2579,12 @@ class AngryBirdsGame {
   }
 
   _loop(now) {
-    const dt = now - this.lastFrameTime;
+    if (!this.lastFrameTime) {
+      this.lastFrameTime = now;
+    }
+    const rawDt = now - this.lastFrameTime;
     this.lastFrameTime = now;
+    const dt = Math.min(Math.max(rawDt, 0), 16.667);
 
     this._update(dt);
     this._draw();
